@@ -101,7 +101,7 @@ export function InventoryPanel({
             <p className={styles.meta}>
               {CATEGORY_LABELS[selected.category]}
               {selected.slot ? ` · ${SLOT_LABELS[selected.slot]}` : ""}
-              {isEquipped(equipped, selected) ? " · puesto" : ""}
+              {isEquipped(equipped, selected) ? " · equipped" : ""}
             </p>
             <p>{selected.blurb}</p>
           </>
