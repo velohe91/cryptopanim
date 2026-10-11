@@ -217,8 +217,7 @@ export interface EquippedEntry {
 
 export function equippedEntries(equipped: EquippedAvatar): EquippedEntry[] {
   const rows: Array<[string, string | null | undefined]> = [
-    ["Base", equipped.baseId],
-    ["Piel", equipped.skinId],
+    ["Skin", equipped.baseId],
     ["Ojos", equipped.eyesId],
     ["Cabello", equipped.hairId],
     ["Superior", equipped.topId],
