@@ -25,16 +25,16 @@ export function ActionBar({ selectedId }: ActionBarProps) {
           disabled={!selected || selectedOn}
           onClick={() => selected && equip(selected.id)}
         >
-          Equipar
+          Equip
         </button>
         <button
           type="button"
           className={styles.primary}
           disabled={!selected || !selectedOn || required}
-          title={required ? "Skin y ojos se cambian, no se quitan." : undefined}
+          title={required ? "Skin and eyes can be changed, but not removed." : undefined}
           onClick={() => selected && unequip(selected.id)}
         >
-          Desequipar
+          Unequip
         </button>
       </div>
       <div className={styles.row}>
@@ -44,13 +44,13 @@ export function ActionBar({ selectedId }: ActionBarProps) {
         <button
           type="button"
           disabled={isNaked(equipped)}
-          title="Quita pelo, ropa, accesorios y fondo. Conserva skin y ojos."
+          title="Removes hair, clothing, accessories, and background. Keeps skin and eyes."
           onClick={naked}
         >
           Get Naked
         </button>
         <button type="button" disabled={!canUndo} onClick={undo}>
-          Deshacer
+          Undo
         </button>
       </div>
     </div>
