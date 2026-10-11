@@ -1,0 +1,25 @@
+.stage {
+  position: relative;
+  width: min(495px, 100%);
+  background: #12141c;
+  box-shadow:
+    0 0 0 2px #141824,
+    0 0 0 4px #3ee0ff,
+    6px 6px 0 #07080f;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  pointer-events: none;
+  user-select: none;
+}

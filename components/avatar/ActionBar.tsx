@@ -1,0 +1,58 @@
+"use client";
+
+import { getItem } from "@/lib/avatar/catalog";
+import { isDefaultOutfit, isEquipped, isNaked } from "@/lib/avatar/equipped";
+import { isRequiredCategory } from "@/types/avatar";
+import { useAvatar } from "./AvatarProvider";
+import styles from "./ActionBar.module.css";
+
+interface ActionBarProps {
+  selectedId: string | null;
+}
+
+export function ActionBar({ selectedId }: ActionBarProps) {
+  const { equipped, canUndo, equip, unequip, reset, naked, undo } = useAvatar();
+  const selected = selectedId ? getItem(selectedId) : undefined;
+  const selectedOn = selected ? isEquipped(equipped, selected) : false;
+  const required = selected ? isRequiredCategory(selected.category) : false;
+
+  return (
+    <div className={styles.bar}>
+      <div className={styles.row}>
+        <button
+          type="button"
+          className={styles.primary}
+          disabled={!selected || selectedOn}
+          onClick={() => selected && equip(selected.id)}
+        >
+          Equipar
+        </button>
+        <button
+          type="button"
+          className={styles.primary}
+          disabled={!selected || !selectedOn || required}
+          title={required ? "Base, piel y ojos se cambian, no se quitan." : undefined}
+          onClick={() => selected && unequip(selected.id)}
+        >
+          Desequipar
+        </button>
+      </div>
+      <div className={styles.row}>
+        <button type="button" disabled={isDefaultOutfit(equipped)} onClick={reset}>
+          Reset
+        </button>
+        <button
+          type="button"
+          disabled={isNaked(equipped)}
+          title="Quita pelo, ropa, accesorios y fondo. Conserva base, piel y ojos."
+          onClick={naked}
+        >
+          Get Naked
+        </button>
+        <button type="button" disabled={!canUndo} onClick={undo}>
+          Deshacer
+        </button>
+      </div>
+    </div>
+  );
+}

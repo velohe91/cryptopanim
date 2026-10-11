@@ -1,0 +1,51 @@
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(100%, 320px);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.row button {
+  flex: 1 1 auto;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 2px solid var(--line-strong);
+  background: #12141e;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.row button:hover:not(:disabled) {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.row button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.row button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: #101820;
+  border-color: var(--cyan);
+}
+
+.row button.primary:hover:not(:disabled) {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  color: #071016;
+}
