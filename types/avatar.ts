@@ -10,9 +10,9 @@
  * `lib/avatar/catalog.ts`. Do not special-case the new id in the renderer.
  */
 
+/** Categories visible in the dressing-room inventory. */
 export const AVATAR_CATEGORIES = [
   "base",
-  "skin",
   "eyes",
   "hair",
   "top",
@@ -21,7 +21,13 @@ export const AVATAR_CATEGORIES = [
   "background",
 ] as const;
 
-export type AvatarCategory = (typeof AVATAR_CATEGORIES)[number];
+/**
+ * Internal categories still include "skin": its sprite remains a render layer,
+ * but users now choose skin tone through the single visible "Skin" (base) tab.
+ */
+export type AvatarCategory =
+  | (typeof AVATAR_CATEGORIES)[number]
+  | "skin";
 
 /** One equipped item per accessory slot. */
 export const ACCESSORY_SLOTS = ["head", "neck", "hands"] as const;
@@ -89,8 +95,8 @@ export interface AvatarItem {
 }
 
 /**
- * Persisted outfit. Required slots (`base`, `skin`, `eyes`) are always set.
- * Everything else is `null` / missing when unequipped.
+ * Persisted outfit. Required slots (base/skin/eyes) are always set.
+ * The visible Skin tab updates the matching base and skin layers together.
  *
  * `accessories` stores at most one item id per slot.
  */
