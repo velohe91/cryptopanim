@@ -1,7 +1,7 @@
 import type { AccessorySlot, AvatarCategory } from "@/types/avatar";
 
 export const CATEGORY_LABELS: Record<AvatarCategory, string> = {
-  base: "Base",
+  base: "Skin",
   skin: "Piel",
   eyes: "Ojos",
   hair: "Cabello",
