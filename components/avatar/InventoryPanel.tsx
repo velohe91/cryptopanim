@@ -36,8 +36,8 @@ export function InventoryPanel({
   const selected = selectedId ? getItem(selectedId) : undefined;
 
   return (
-    <section className={styles.panel} aria-label="Inventario">
-      <div className={styles.tabs} role="tablist" aria-label="Categorías">
+    <section className={styles.panel} aria-label="Inventory">
+      <div className={styles.tabs} role="tablist" aria-label="Categories">
         {AVATAR_CATEGORIES.map((entry) => {
           const active = entry === category;
           return (
@@ -56,9 +56,9 @@ export function InventoryPanel({
       </div>
 
       {category === "accessory" ? (
-        <div className={styles.subtabs} role="tablist" aria-label="Hueco de accesorio">
+        <div className={styles.subtabs} role="tablist" aria-label="Accessory slot">
           <SlotButton
-            label="Todos"
+            label="All"
             active={accessorySlot === "all"}
             onClick={() => onAccessorySlot("all")}
           />
@@ -87,7 +87,7 @@ export function InventoryPanel({
               >
                 <ItemThumb item={item} />
                 <span className={styles.cardName}>{item.name}</span>
-                {on ? <span className={styles.badge}>Puesto</span> : null}
+                {on ? <span className={styles.badge}>Equipped</span> : null}
               </button>
             </li>
           );
@@ -106,7 +106,7 @@ export function InventoryPanel({
             <p>{selected.blurb}</p>
           </>
         ) : (
-          <p>Elige una prenda del inventario.</p>
+          <p>Choose an item from the inventory.</p>
         )}
       </footer>
     </section>
