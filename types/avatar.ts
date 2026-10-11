@@ -17,6 +17,7 @@ export const AVATAR_CATEGORIES = [
   "hair",
   "top",
   "bottom",
+  "shoes",
   "accessory",
   "background",
 ] as const;
