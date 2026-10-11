@@ -113,7 +113,7 @@ The wardrobe currently on disk:
 ```ts
 {
   id: "jacket-new",
-  name: "Chaqueta nueva",
+  name: "New jacket",
   category: "top",
   blurb: "Short description shown in the inventory.",
   layers: [{ src: "/assets/top/jacket-new.png", z: LAYER_Z.top }],
