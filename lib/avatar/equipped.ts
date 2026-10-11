@@ -118,8 +118,22 @@ export function isEquipped(equipped: EquippedAvatar, item: AvatarItem): boolean 
 
 export function equipItem(equipped: EquippedAvatar, item: AvatarItem): EquippedAvatar {
   switch (item.category) {
-    case "base":
-      return { ...equipped, baseId: item.id };
+    case "base": {
+      // The single visible Skin tab selects the body outline and matching
+      // skin-fill layer together, avoiding two tabs for the same tone choice.
+      const matchingSkinId = item.id === "light"
+        ? "skin-light"
+        : item.id === "light-medium"
+          ? "skin-light-medium"
+          : item.id === "medium"
+            ? "skin-medium"
+            : item.id === "medium-deep"
+              ? "skin-medium-deep"
+              : item.id === "deep"
+                ? "skin-deep"
+                : equipped.skinId;
+      return { ...equipped, baseId: item.id, skinId: matchingSkinId };
+    }
     case "skin":
       return { ...equipped, skinId: item.id };
     case "eyes":
