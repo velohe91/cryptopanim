@@ -155,7 +155,7 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
     id: "shorts",
     name: "Shorts",
     category: "bottom",
-    blurb: "Shorts azul marino.",
+    blurb: "Navy blue shorts.",
     layers: [{ src: "/assets/bottom/shorts.png", z: LAYER_Z.bottom }],
   },
   {
