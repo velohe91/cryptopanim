@@ -46,7 +46,7 @@ export function DressingRoom() {
         </div>
         <div className={styles.room}>
           <p>Dressing Room</p>
-          <p className={styles.save}>Guardado en este navegador</p>
+          <p className={styles.save}>Saved in this browser</p>
         </div>
       </header>
 
@@ -63,7 +63,7 @@ export function DressingRoom() {
           </ul>
           <ActionBar selectedId={selectedId} />
           <p className={styles.hint}>
-            Pulsa una prenda para equiparla. Deshacer cubre esta sesión. Get Naked deja base, piel y ojos.
+            Select an item to equip it. Undo applies to this session. Get Naked keeps skin and eyes.
           </p>
         </section>
 
