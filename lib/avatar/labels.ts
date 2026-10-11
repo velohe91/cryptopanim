@@ -7,6 +7,7 @@ export const CATEGORY_LABELS: Record<AvatarCategory, string> = {
   hair: "Hair",
   top: "Tops",
   bottom: "Bottoms",
+  shoes: "Shoes",
   accessory: "Accessories",
   background: "Background",
 };
