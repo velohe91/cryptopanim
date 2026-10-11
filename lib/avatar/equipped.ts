@@ -218,14 +218,14 @@ export interface EquippedEntry {
 export function equippedEntries(equipped: EquippedAvatar): EquippedEntry[] {
   const rows: Array<[string, string | null | undefined]> = [
     ["Skin", equipped.baseId],
-    ["Ojos", equipped.eyesId],
-    ["Cabello", equipped.hairId],
-    ["Superior", equipped.topId],
-    ["Inferior", equipped.bottomId],
-    ["Cabeza", equipped.accessories.head],
-    ["Cuello", equipped.accessories.neck],
-    ["Manos", equipped.accessories.hands],
-    ["Fondo", equipped.backgroundId],
+    ["Eyes", equipped.eyesId],
+    ["Hair", equipped.hairId],
+    ["Top", equipped.topId],
+    ["Bottom", equipped.bottomId],
+    ["Head", equipped.accessories.head],
+    ["Neck", equipped.accessories.neck],
+    ["Hands", equipped.accessories.hands],
+    ["Background", equipped.backgroundId],
   ];
 
   return rows.flatMap(([label, id]) => {
