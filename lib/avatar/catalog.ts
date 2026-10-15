@@ -244,6 +244,21 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
   },
 
   {
+    id: "black-sneakers",
+    name: "Black Sneakers",
+    category: "shoes",
+    blurb: "Black sneakers.",
+    layers: [{ src: "/assets/shoes/black sneakers.png", z: LAYER_Z.shoes }],
+  },
+  {
+    id: "blue-sneakers",
+    name: "Blue Sneakers",
+    category: "shoes",
+    blurb: "Blue sneakers.",
+    layers: [{ src: "/assets/shoes/blue sneakers.png", z: LAYER_Z.shoes }],
+  },
+
+  {
     id: "cap",
     name: "Cap",
     category: "accessory",
