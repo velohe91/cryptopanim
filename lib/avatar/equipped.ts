@@ -14,6 +14,7 @@ export const DEFAULT_EQUIPPED: EquippedAvatar = {
   hairId: "high-bun",
   topId: "casual-shirt",
   bottomId: "shorts",
+  shoesId: null,
   accessories: { head: "cap" },
   backgroundId: "based-blue",
 };
@@ -65,6 +66,7 @@ export function sanitizeEquipped(input: unknown): EquippedAvatar {
     hairId: idForCategory(raw.hairId, "hair"),
     topId: idForCategory(raw.topId, "top"),
     bottomId: idForCategory(raw.bottomId, "bottom"),
+    shoesId: idForCategory(raw.shoesId, "shoes"),
     backgroundId: idForCategory(raw.backgroundId, "background"),
     accessories,
   };
@@ -78,6 +80,7 @@ export function serializeEquipped(equipped: EquippedAvatar): string {
     hairId: equipped.hairId,
     topId: equipped.topId,
     bottomId: equipped.bottomId,
+    shoesId: equipped.shoesId,
     backgroundId: equipped.backgroundId,
     accessories: {
       head: equipped.accessories.head ?? null,
@@ -105,6 +108,8 @@ export function isEquipped(equipped: EquippedAvatar, item: AvatarItem): boolean 
       return equipped.topId === item.id;
     case "bottom":
       return equipped.bottomId === item.id;
+    case "shoes":
+      return equipped.shoesId === item.id;
     case "background":
       return equipped.backgroundId === item.id;
     case "accessory":
@@ -144,6 +149,8 @@ export function equipItem(equipped: EquippedAvatar, item: AvatarItem): EquippedA
       return { ...equipped, topId: item.id };
     case "bottom":
       return { ...equipped, bottomId: item.id };
+    case "shoes":
+      return { ...equipped, shoesId: item.id };
     case "background":
       return { ...equipped, backgroundId: item.id };
     case "accessory": {
@@ -171,6 +178,8 @@ export function unequipItem(equipped: EquippedAvatar, item: AvatarItem): Equippe
       return { ...equipped, topId: null };
     case "bottom":
       return { ...equipped, bottomId: null };
+    case "shoes":
+      return { ...equipped, shoesId: null };
     case "background":
       return { ...equipped, backgroundId: null };
     case "accessory": {
@@ -197,6 +206,7 @@ export function nakedFrom(equipped: EquippedAvatar): EquippedAvatar {
     hairId: null,
     topId: null,
     bottomId: null,
+    shoesId: null,
     accessories: {},
     backgroundId: null,
   };
@@ -222,6 +232,7 @@ export function equippedEntries(equipped: EquippedAvatar): EquippedEntry[] {
     ["Hair", equipped.hairId],
     ["Top", equipped.topId],
     ["Bottom", equipped.bottomId],
+    ["Shoes", equipped.shoesId],
     ["Head", equipped.accessories.head],
     ["Neck", equipped.accessories.neck],
     ["Hands", equipped.accessories.hands],
