@@ -49,26 +49,26 @@ export const AVATAR_FRAME = {
 } as const;
 
 /**
- * Paint-order bands. Leave gaps so a new part can sit between existing
- * layers without renumbering the catalog.
+ * Paint order from back to front:
+ * background → skin/body → eyes → hair → every outfit category → accessories.
  *
- * background → hair back → skin → body outline → bottom → top →
- * neck → eyes → hair front → hood → head → hands
+ * Keep all outfit categories on the same band so tops, bottoms, dresses,
+ * costumes, and shoes consistently render in front of hair.
  */
 export const LAYER_Z = {
   background: 0,
-  hairBack: 10,
-  skin: 20,
-  base: 30,
+  skin: 10,
+  base: 15,
+  eyes: 20,
+  hairBack: 30,
+  hairFront: 30,
   bottom: 40,
-  shoes: 45,
-  top: 50,
-  neck: 60,
-  eyes: 70,
-  hairFront: 80,
-  hood: 85,
-  head: 90,
-  hands: 100,
+  shoes: 40,
+  top: 40,
+  neck: 50,
+  hood: 50,
+  head: 50,
+  hands: 50,
 } as const;
 
 export type LayerZ = (typeof LAYER_Z)[keyof typeof LAYER_Z];
