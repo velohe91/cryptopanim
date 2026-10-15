@@ -11,7 +11,7 @@ CryptoPanim is a Web3 social environment inspired by virtual worlds such as Gaia
 The current app is a dressing room:
 
 - A square avatar is drawn as stacked full-frame sprites (990×990).
-- The inventory filters by category (base, skin, eyes, hair, top, bottom, accessories, background).
+- The inventory filters by category (base, skin, eyes, hair, top, bottom, shoes, accessories, background).
 - Equip, unequip, reset, Get Naked, and session undo update the preview immediately.
 - The outfit is stored in `localStorage` under `cryptopanim.avatar.v1`.
 
@@ -90,9 +90,11 @@ The wardrobe currently on disk:
 | Piece | File |
 | --- | --- |
 | Eyes | `public/assets/eyes/expressive.png`, `left.png`, `right.png` |
-| Hair | `public/assets/hair/High Bun.png`, `Pink Long Layered.png`, `Purple Long Wave.png` |
-| Tops | `public/assets/top/casual shirt.png`, `Rarible-Shirt.png` |
+| Hair | `public/assets/hair/Brown High Bun.png`, `Blonde Side Sweep.png`, `Navy Long Wave.png`, `Purple Long Layered.png`, `Pink Long Layered.png`, `Purple Long Wave.png`, `Short Bob.png`, `cyan High Bun.png` |
+| Tops | `public/assets/top/casual shirt.png`, `based-tshirt.png` |
 | Bottoms | `public/assets/bottom/shorts.png`, `pants.png`, `skirt.png` |
+| Shoes | Add 990×990 PNGs under `public/assets/shoes/` and register them in the catalog |
+| Costumes / dresses | `public/assets/costumes/` and `public/assets/dress/` (currently shown in Tops) |
 | Head | `public/assets/accessory/cap.png`, `headphones.png` |
 | Background | `public/assets/background/based-blue.png` |
 | Skin | `public/assets/skin/light.png`, `light-medium.png`, `medium.png`, `medium-deep.png`, `deep.png` |
@@ -107,7 +109,7 @@ The wardrobe currently on disk:
 
 1. Export a 990×990 PNG, transparent outside the garment, lined up with `public/assets/_guide/body-guide.png`.
 2. Save it under `public/assets/<category>/<id>.png`.
-   Categories: `base`, `skin`, `eyes`, `hair`, `top`, `bottom`, `accessory`, `background`.
+   Categories: `base`, `skin`, `eyes`, `hair`, `top`, `bottom`, `shoes`, `accessory`, `background`.
 3. Append an item in `lib/avatar/catalog.ts`.
 
 ```ts

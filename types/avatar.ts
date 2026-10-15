@@ -59,6 +59,7 @@ export const LAYER_Z = {
   skin: 20,
   base: 30,
   bottom: 40,
+  shoes: 45,
   top: 50,
   neck: 60,
   eyes: 70,
@@ -108,6 +109,7 @@ export interface EquippedAvatar {
   hairId: string | null;
   topId: string | null;
   bottomId: string | null;
+  shoesId: string | null;
   accessories: Partial<Record<AccessorySlot, string>>;
   backgroundId: string | null;
 }

@@ -23,6 +23,7 @@ export function resolveLayers(equipped: EquippedAvatar): ResolvedLayer[] {
     equipped.skinId,
     equipped.baseId,
     equipped.bottomId,
+    equipped.shoesId,
     equipped.topId,
     equipped.eyesId,
   ];
