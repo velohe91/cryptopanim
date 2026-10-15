@@ -12,6 +12,7 @@ import {
   type AvatarItem,
 } from "@/types/avatar";
 import { useAvatar } from "./AvatarProvider";
+import { EquipControls } from "./ActionBar";
 import styles from "./InventoryPanel.module.css";
 
 interface InventoryPanelProps {
@@ -109,6 +110,8 @@ export function InventoryPanel({
           <p>Choose an item from the inventory.</p>
         )}
       </footer>
+
+      <EquipControls selectedId={selectedId} />
     </section>
   );
 }
