@@ -1,7 +1,7 @@
 "use client";
 
 import { getItem } from "@/lib/avatar/catalog";
-import { isDefaultOutfit, isEquipped, isNaked, } from "@/lib/avatar/equipped";
+import { isDefaultOutfit, isEquipped, isNaked } from "@/lib/avatar/equipped";
 import { isRequiredCategory } from "@/types/avatar";
 import { useAvatar } from "./AvatarProvider";
 import styles from "./ActionBar.module.css";
