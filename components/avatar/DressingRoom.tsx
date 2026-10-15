@@ -61,7 +61,7 @@ export function DressingRoom() {
               </li>
             ))}
           </ul>
-          <ActionBar selectedId={selectedId} />
+          <ActionBar />
           <p className={styles.hint}>
             Select an item to equip it. Undo applies to this session. Get Naked keeps skin and eyes.
           </p>
