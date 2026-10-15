@@ -17,6 +17,8 @@ export const AVATAR_CATEGORIES = [
   "hair",
   "top",
   "bottom",
+  "dress",
+  "costumes",
   "shoes",
   "accessory",
   "background",
@@ -109,6 +111,8 @@ export interface EquippedAvatar {
   hairId: string | null;
   topId: string | null;
   bottomId: string | null;
+  dressId: string | null;
+  costumesId: string | null;
   shoesId: string | null;
   accessories: Partial<Record<AccessorySlot, string>>;
   backgroundId: string | null;
