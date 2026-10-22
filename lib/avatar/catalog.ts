@@ -67,6 +67,57 @@ const HAIR_ITEMS: AvatarItem[] = HAIR_STYLES.flatMap((style) =>
   })),
 );
 
+const BOTTOM_STYLES = [
+  {
+    id: "jeans",
+    name: "Jeans",
+    folder: "Jeans",
+    colors: ["Black Denim", "Classic Blue", "Dark Denim", "Light Wash", "Vintage Brown"],
+  },
+  {
+    id: "pants",
+    name: "Pants",
+    folder: "Pants",
+    colors: ["Black Denim", "Classic Blue", "Dark Denim", "Light Wash", "Vintage Brown"],
+  },
+  {
+    id: "shorts",
+    name: "Shorts",
+    folder: "Shorts",
+    colors: ["Black Denim", "Classic Blue", "Dark Denim", "Light Wash", "Vintage Brown"],
+  },
+  {
+    id: "skirt",
+    name: "Skirt",
+    folder: "Skirt",
+    colors: ["Black Denim", "Classic Blue", "Dark Denim", "Light Wash", "Vintage Brown"],
+  },
+] as const;
+
+const BOTTOM_ITEMS: AvatarItem[] = [
+  ...BOTTOM_STYLES.flatMap((style) =>
+    style.colors.map((color) => ({
+      id: style.id === "jeans" && color === "Classic Blue"
+        ? "pants"
+        : `${style.id}-${color.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, "")}`,
+      name: `${style.name} · ${color}`,
+      category: "bottom" as const,
+      blurb: `${color} ${style.name.toLowerCase()} bottoms.`,
+      layers: [{
+        src: `/assets/bottom/${style.folder}/${color}.png`,
+        z: LAYER_Z.bottom,
+      }],
+    })),
+  ),
+  {
+    id: "shorts",
+    name: "Shorts",
+    category: "bottom" as const,
+    blurb: "Classic shorts.",
+    layers: [{ src: "/assets/bottom/Shorts/shorts.png", z: LAYER_Z.bottom }],
+  },
+];
+
 const TOP_STYLES = [
   {
     id: "casual",
@@ -339,27 +390,7 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
     layers: [{ src: "/assets/dress/red-dress.png", z: LAYER_Z.top }],
   },
 
-  {
-    id: "shorts",
-    name: "Shorts",
-    category: "bottom",
-    blurb: "Navy blue shorts.",
-    layers: [{ src: "/assets/bottom/shorts.png", z: LAYER_Z.bottom }],
-  },
-  {
-    id: "pants",
-    name: "Pants",
-    category: "bottom",
-    blurb: "Jeans with shoes.",
-    layers: [{ src: "/assets/bottom/pants.png", z: LAYER_Z.bottom }],
-  },
-  {
-    id: "skirt",
-    name: "Skirt",
-    category: "bottom",
-    blurb: "Pink ruffled skirt.",
-    layers: [{ src: "/assets/bottom/skirt.png", z: LAYER_Z.bottom }],
-  },
+  ...BOTTOM_ITEMS,
 
   {
     id: "black-sneakers",
