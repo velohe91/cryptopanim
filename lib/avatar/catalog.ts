@@ -67,6 +67,48 @@ const HAIR_ITEMS: AvatarItem[] = HAIR_STYLES.flatMap((style) =>
   })),
 );
 
+const TOP_STYLES = [
+  {
+    id: "casual",
+    name: "Casual",
+    folder: "casual",
+    colors: ["Candy Pink", "Electric Blue", "Grape Soda", "Lemon Pop", "Neon Lime", "Sunset Party"],
+  },
+  {
+    id: "shirt",
+    name: "Shirt",
+    folder: "shirt",
+    colors: ["Based Shirt", "Candy Pink", "Electric Blue", "Grape Soda", "Lemon Pop", "Neon Lime", "Sunset Party"],
+  },
+  {
+    id: "sweater",
+    name: "Sweater",
+    folder: "sweater",
+    colors: ["Based Sweater", "Candy Pink", "Cyan", "Electric Blue", "Lemon Pop", "Neon Lime", "Sunset Party"],
+  },
+  {
+    id: "tshirt",
+    name: "T-Shirt",
+    folder: "tshirt",
+    colors: ["Based T-Shirt", "Candy Pink", "Electric Blue", "Grape Soda", "Lemon Pop", "Neon Lime", "Sunset Party"],
+  },
+] as const;
+
+const TOP_ITEMS: AvatarItem[] = TOP_STYLES.flatMap((style) =>
+  style.colors.map((color) => ({
+    id: style.id === "casual" && color === "Electric Blue"
+      ? "casual-shirt"
+      : `${style.id}-${color.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, "")}`,
+    name: `${style.name} · ${color}`,
+    category: "top" as const,
+    blurb: `${color} ${style.name.toLowerCase()} top.`,
+    layers: [{
+      src: `/assets/top/${style.folder}/${color}.png`,
+      z: LAYER_Z.top,
+    }],
+  })),
+);
+
 export const AVATAR_CATALOG: readonly AvatarItem[] = [
   {
     id: "light",
@@ -260,20 +302,7 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
   },
   ...HAIR_ITEMS,
 
-  {
-    id: "casual-shirt",
-    name: "Casual shirt",
-    category: "top",
-    blurb: "Cyan shirt.",
-    layers: [{ src: "/assets/top/casual shirt.png", z: LAYER_Z.top }],
-  },
-  {
-    id: "based-tshirt",
-    name: "Based T-shirt",
-    category: "top",
-    blurb: "Based graphic T-shirt.",
-    layers: [{ src: "/assets/top/based-tshirt.png", z: LAYER_Z.top }],
-  },
+  ...TOP_ITEMS,
   {
     id: "bitcoin-costume",
     name: "Bitcoin Costume",
