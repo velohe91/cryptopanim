@@ -74,7 +74,11 @@
 .fullButton:hover { border-color: var(--purple); color: #e4d9ff; }
 .dangerButton { color: #efa7ba; border-color: #63364c; }
 .dangerButton:hover { background: #311927; }
-.layerList { display: grid; gap: 6px; }
+.layerList { display: flex; flex-direction: column; gap: 5px; max-height: 340px; overflow-y: auto; overflow-x: hidden; padding: 2px 4px 6px 0; scrollbar-width: thin; scrollbar-color: #51466f #111522; overscroll-behavior: contain; }
+.layerList::-webkit-scrollbar { width: 7px; }
+.layerList::-webkit-scrollbar-track { background: #111522; border-radius: 8px; }
+.layerList::-webkit-scrollbar-thumb { background: #51466f; border-radius: 8px; }
+.layerRow, .activeLayer { flex: 0 0 auto; }
 .layerRow, .activeLayer { display: grid; grid-template-columns: 22px minmax(50px, 1fr) 19px 19px 19px; gap: 3px; align-items: center; padding: 7px 5px; border: 1px solid #30364b; background: #171a27; }
 .activeLayer { border-color: #8e75d4; background: #29213e; }
 .visibility, .layerMove { border: 0; background: transparent; color: #aaa5c5; padding: 2px; }
