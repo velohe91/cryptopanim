@@ -19,6 +19,54 @@ import {
  * of that canvas (`public/assets/_guide/body-guide.png`). Paths below match
  * the exported filenames, including spaces.
  */
+const HAIR_STYLES = [
+  {
+    id: "high-bun",
+    name: "High Bun",
+    folder: "high bun",
+    colors: ["Aqua Pop", "Birthday Pink", "Brown", "Candy Rainbow", "Cherry Red", "Chocolate Party", "Cotton Candy", "Cyan", "Electric Blue", "Golden Party", "Lavender Disco", "Lime Confetti", "Mint Pop", "Neon Purple", "Orange Soda"],
+  },
+  {
+    id: "long-layered",
+    name: "Long Layered",
+    folder: "long layered",
+    colors: ["Aqua Pop", "Birthday Pink", "Candy Rainbow ", "Cherry Red", "Chocolate Party", "Cotton Candy", "Cyan", "Electric Blue", "Golden Party", "Lavender Disco", "Lime Confetti", "Mint Pop", "Neon Purple", "Orange Soda", "Pink", "Purple"],
+  },
+  {
+    id: "long-wave",
+    name: "Long Wave",
+    folder: "long wave",
+    colors: ["Aqua Pop", "Birthday Pink", "Candy Rainbow", "Cherry Red", "Chocolate Party", "Cotton Candy", "Cyan", "Electric Blue", "Golden Party", "Lavender Disco", "Lime Confetti", "Mint Pop", "Navy", "Neon Purple", "Orange Soda", "Purple"],
+  },
+  {
+    id: "short-bob",
+    name: "Short Bob",
+    folder: "short bob",
+    colors: ["Aqua Pop", "Birthday Pink", "Candy Rainbow", "Cherry Red", "Chocolate Party", "Cotton Candy", "Cyan", "Electric Blue", "Golden Party", "Lavender Disco", "Lime Confetti", "Mint Pop", "Neon Purple", "Orange Soda", "Red"],
+  },
+  {
+    id: "side-sweep",
+    name: "Side Sweep",
+    folder: "side sweep",
+    colors: ["Aqua Pop", "Birthday Pink", "Blonde", "Candy Rainbow", "Cherry Red", "Chocolate Party", "Cotton Candy", "Cyan", "Electric Blue", "Golden Party", "Lavender Disco", "Lime Confetti", "Mint Pop", "Neon Purple", "Orange Soda"],
+  },
+] as const;
+
+const HAIR_ITEMS: AvatarItem[] = HAIR_STYLES.flatMap((style) =>
+  style.colors.map((color) => ({
+    id: style.id === "high-bun" && color === "Brown"
+      ? "high-bun"
+      : `${style.id}-${color.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, "")}`,
+    name: `${style.name} · ${color.trim()}`,
+    category: "hair" as const,
+    blurb: `${color.trim()} ${style.name.toLowerCase()} hairstyle.`,
+    layers: [{
+      src: `/assets/hair/${style.folder}/${color}.png`,
+      z: LAYER_Z.hairFront,
+    }],
+  })),
+);
+
 export const AVATAR_CATALOG: readonly AvatarItem[] = [
   {
     id: "light",
@@ -210,62 +258,7 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
     blurb: "Pixel blue eyes.",
     layers: [{ src: "/assets/eyes/Pixel Blue.png", z: LAYER_Z.eyes }],
   },
-  {
-    id: "blonde-side-sweep",
-    name: "Blonde Side Sweep",
-    category: "hair",
-    blurb: "Blonde hair swept to one side.",
-    layers: [{ src: "/assets/hair/Blonde Side Sweep.png", z: LAYER_Z.hairFront }],
-  },
-  {
-    id: "navy-long-wave",
-    name: "Navy Long Wave",
-    category: "hair",
-    blurb: "Long navy-blue waves.",
-    layers: [{ src: "/assets/hair/Navy Long Wave.png", z: LAYER_Z.hairFront }],
-  },
-  {
-    id: "purple-long-layered",
-    name: "Purple Long Layered",
-    category: "hair",
-    blurb: "Long layered purple hair.",
-    layers: [{ src: "/assets/hair/Purple Long Layered.png", z: LAYER_Z.hairFront }],
-  },
-  {
-    id: "short-bob",
-    name: "Short Bob",
-    category: "hair",
-    blurb: "Short bob haircut.",
-    layers: [{ src: "/assets/hair/Short Bob.png", z: LAYER_Z.hairFront }],
-  },
-  {
-    id: "cyan-high-bun",
-    name: "Cyan High Bun",
-    category: "hair",
-    blurb: "Cyan hair in a high bun.",
-    layers: [{ src: "/assets/hair/cyan High Bun.png", z: LAYER_Z.hairFront }],
-  },
-  {
-    id: "high-bun",
-    name: "High bun",
-    category: "hair",
-    blurb: "Brown bun with a loose strand.",
-    layers: [{ src: "/assets/hair/Brown High Bun.png", z: LAYER_Z.hairFront }],
-  },
-  {
-    id: "pink-layered",
-    name: "Pink layers",
-    category: "hair",
-    blurb: "Layered pink hair.",
-    layers: [{ src: "/assets/hair/Pink Long Layered.png", z: LAYER_Z.hairFront }],
-  },
-  {
-    id: "purple-wave",
-    name: "Purple waves",
-    category: "hair",
-    blurb: "Long purple waves.",
-    layers: [{ src: "/assets/hair/Purple Long Wave.png", z: LAYER_Z.hairFront }],
-  },
+  ...HAIR_ITEMS,
 
   {
     id: "casual-shirt",
