@@ -515,13 +515,33 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
     layers: [{ src: "/assets/accessory/cap.png", z: LAYER_Z.head }],
   },
 
-  {
-    id: "based-blue",
-    name: "Blue",
-    category: "background",
-    blurb: "Blue background with a ground shadow.",
-    layers: [{ src: "/assets/background/based-blue.png", z: LAYER_Z.background }],
-  },
+  ...[
+    { file: "Based Backgrounds/Grid.png", id: "background-grid", name: "Grid", group: "based" },
+    { file: "Based Backgrounds/Pixel Blocks.png", id: "background-pixel-blocks", name: "Pixel Blocks", group: "based" },
+    { file: "Based Backgrounds/Vertical-bars.png", id: "background-vertical-bars", name: "Vertical Bars", group: "based" },
+    { file: "Party Backgrounds/Aqua Pop balloons.png", id: "background-aqua-pop-balloons", name: "Aqua Pop Balloons", group: "party" },
+    { file: "Party Backgrounds/Aqua Pop dj deck.png", id: "background-aqua-pop-dj-deck", name: "Aqua Pop DJ Deck", group: "party" },
+    { file: "Party Backgrounds/Candy Blue balloons.png", id: "background-candy-blue-balloons", name: "Candy Blue Balloons", group: "party" },
+    { file: "Party Backgrounds/Candy Blue dj deck.png", id: "background-candy-blue-dj-deck", name: "Candy Blue DJ Deck", group: "party" },
+    { file: "Party Backgrounds/Confetti Orange balloons.png", id: "background-confetti-orange-balloons", name: "Confetti Orange Balloons", group: "party" },
+    { file: "Party Backgrounds/Confetti Orange dj deck.png", id: "background-confetti-orange-dj-deck", name: "Confetti Orange DJ Deck", group: "party" },
+    { file: "Party Backgrounds/Deep Berry ballons.png", id: "background-deep-berry-balloons", name: "Deep Berry Balloons", group: "party" },
+    { file: "Party Backgrounds/Deep Berry dj deck.png", id: "background-deep-berry-dj-deck", name: "Deep Berry DJ Deck", group: "party" },
+    { file: "Party Backgrounds/Midnight balloons.png", id: "background-midnight-balloons", name: "Midnight Balloons", group: "party" },
+    { file: "Party Backgrounds/Midnight dj deck.png", id: "background-midnight-dj-deck", name: "Midnight DJ Deck", group: "party" },
+    { file: "Party Backgrounds/Tangerine baloons.png", id: "background-tangerine-balloons", name: "Tangerine Balloons", group: "party" },
+    { file: "Party Backgrounds/Tangerine dj deck.png", id: "background-tangerine-dj-deck", name: "Tangerine DJ Deck", group: "party" },
+    { file: "Party Backgrounds/based-blue.png", id: "based-blue", name: "Based Blue", group: "party" },
+    { file: "Party Backgrounds/candy shadow balloons.png", id: "background-candy-shadow-balloons", name: "Candy Shadow Balloons", group: "party" },
+    { file: "Party Backgrounds/candy shadow dj deck.png", id: "background-candy-shadow-dj-deck", name: "Candy Shadow DJ Deck", group: "party" },
+  ].map((background) => ({
+    id: background.id,
+    name: background.name,
+    category: "background" as const,
+    blurb: `${background.name} background.`,
+    backgroundGroup: background.group,
+    layers: [{ src: `/assets/background/${background.file}`, z: LAYER_Z.background }],
+  })),
 ];
 
 const BY_ID = new Map(AVATAR_CATALOG.map((item) => [item.id, item]));
