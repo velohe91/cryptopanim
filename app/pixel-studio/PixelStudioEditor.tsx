@@ -149,11 +149,15 @@ export default function PixelStudioEditor() {
       ctx.stroke();
     }
     if (selection) {
-      ctx.strokeStyle = "#3ee0ff";
-      ctx.lineWidth = 0.16;
+      ctx.save();
+      ctx.strokeStyle = "#111827";
+      ctx.lineWidth = 0.35;
       ctx.setLineDash([0.5, 0.5]);
-      ctx.strokeRect(selection.x, selection.y, selection.w, selection.h);
-      ctx.setLineDash([]);
+      ctx.strokeRect(selection.x + 0.175, selection.y + 0.175, Math.max(0.65, selection.w - 0.35), Math.max(0.65, selection.h - 0.35));
+      ctx.strokeStyle = "#3ee0ff";
+      ctx.lineDashOffset = 0.5;
+      ctx.strokeRect(selection.x + 0.175, selection.y + 0.175, Math.max(0.65, selection.w - 0.35), Math.max(0.65, selection.h - 0.35));
+      ctx.restore();
     }
   }, [dimensions, composite, showGrid, zoom, onionSkin, frameIndex, frames, selection]);
 
