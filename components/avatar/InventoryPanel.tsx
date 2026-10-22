@@ -35,10 +35,13 @@ export function InventoryPanel({
 }: InventoryPanelProps) {
   const { equipped } = useAvatar();
   const [hairStyle, setHairStyle] = useState("high-bun");
+  const [topStyle, setTopStyle] = useState("casual");
   const allItems = itemsInCategory(category, accessorySlot);
   const items = category === "hair"
     ? allItems.filter((item) => item.id.startsWith(`${hairStyle}-`) || (hairStyle === "high-bun" && item.id === "high-bun"))
-    : allItems;
+    : category === "top"
+      ? allItems.filter((item) => item.id.startsWith(`${topStyle}-`) || (topStyle === "casual" && item.id === "casual-shirt"))
+      : allItems;
   const selected = selectedId ? getItem(selectedId) : undefined;
 
   return (
@@ -75,6 +78,24 @@ export function InventoryPanel({
               label={label}
               active={hairStyle === id}
               onClick={() => setHairStyle(id)}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      {category === "top" ? (
+        <div className={styles.subtabs} role="tablist" aria-label="Top style">
+          {[
+            ["casual", "Casual"],
+            ["shirt", "Shirt"],
+            ["sweater", "Sweater"],
+            ["tshirt", "T-Shirt"],
+          ].map(([id, label]) => (
+            <SlotButton
+              key={id}
+              label={label}
+              active={topStyle === id}
+              onClick={() => setTopStyle(id)}
             />
           ))}
         </div>
