@@ -36,6 +36,8 @@ function pixelIndex(x: number, y: number, width: number) { return y * width + x;
 
 export default function PixelStudioEditor() {
   const [dimensions, setDimensions] = useState({ width: 32, height: 32 });
+  const [documentName, setDocumentName] = useState("Untitled");
+  const [importing, setImporting] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [frames, setFrames] = useState<Frame[]>([makeFrame(1, 32, 32, 1)]);
   const [frameIndex, setFrameIndex] = useState(0);
@@ -401,6 +403,54 @@ export default function PixelStudioEditor() {
     });
   };
   const clearLayer = () => { remember(); updateActiveLayer(Array(dimensions.width * dimensions.height).fill(TRANSPARENT)); setStatus("Layer cleared"); };
+
+  const importPixil = async (file: File) => {
+    setImporting(true);
+    try {
+      const raw = JSON.parse(await file.text()) as any;
+      if (raw?.application !== "pixil" || !Array.isArray(raw.frames) || !raw.frames.length) throw new Error("This is not a supported Pixil project.");
+      const width = Number(raw.width); const height = Number(raw.height);
+      if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 512 || height > 512) throw new Error("Unsupported canvas dimensions.");
+      let id = 1;
+      const importedFrames: Frame[] = [];
+      for (let fi = 0; fi < raw.frames.length; fi++) {
+        const sourceFrame = raw.frames[fi]; const sourceLayers = Array.isArray(sourceFrame.layers) ? sourceFrame.layers : [];
+        const layers: Layer[] = [];
+        for (const sourceLayer of sourceLayers) {
+          const src = typeof sourceLayer.src === "string" ? sourceLayer.src.replace(/^data:image\\/png[^,]*,/i, "data:image/png;base64,") : "";
+          const pixels = Array(width * height).fill(TRANSPARENT) as string[];
+          if (src) {
+            const image = new Image(); image.src = src;
+            await new Promise<void>((resolve, reject) => { image.onload = () => resolve(); image.onerror = () => reject(new Error("A layer image could not be decoded.")); });
+            const bitmap = document.createElement("canvas"); bitmap.width = width; bitmap.height = height;
+            const ctx = bitmap.getContext("2d", { willReadFrequently: true });
+            if (!ctx) throw new Error("Canvas image decoding is unavailable.");
+            ctx.clearRect(0, 0, width, height); ctx.drawImage(image, 0, 0, width, height);
+            const imageData = ctx.getImageData(0, 0, width, height);
+            for (let i = 0; i < width * height; i++) {
+              if (imageData.data[i * 4 + 3] < 128) continue;
+              const r = imageData.data[i * 4].toString(16).padStart(2, "0");
+              const g = imageData.data[i * 4 + 1].toString(16).padStart(2, "0");
+              const b = imageData.data[i * 4 + 2].toString(16).padStart(2, "0");
+              pixels[i] = "#" + r + g + b;
+            }
+          }
+          const opacityValue = Number(sourceLayer.opacity ?? 1);
+          layers.push({ id: id++, name: String(sourceLayer.name || ("Layer " + (layers.length + 1))), visible: sourceLayer.active !== "False" && sourceLayer.visible !== false, opacity: Math.round(Math.max(0, Math.min(1, opacityValue)) * 100), pixels });
+        }
+        if (!layers.length) layers.push(makeLayer(id++, width, height, "Layer 1"));
+        importedFrames.push({ id: fi + 1, duration: Math.max(1, Number(sourceFrame.speed ?? raw.speed ?? 100)), layers });
+      }
+      const activeFrameIndex = Math.max(0, Math.min(importedFrames.length - 1, Number(raw.currentFrame ?? 0)));
+      const selectedSourceId = Number(raw.frames[activeFrameIndex]?.selectedLayer ?? 0);
+      const importedActiveLayer = importedFrames[activeFrameIndex].layers.find((layer, index) => Number((raw.frames[activeFrameIndex].layers ?? [])[index]?.id) === selectedSourceId) ?? importedFrames[activeFrameIndex].layers[importedFrames[activeFrameIndex].layers.length - 1];
+      const importedPalette = raw.colors?.["bottom palette"] ?? raw.colors?.default;
+      setDimensions({ width, height }); setFrames(importedFrames); setFrameIndex(activeFrameIndex); setActiveLayerId(importedActiveLayer.id); setNextId(id + 1); setDocumentName(String(raw.name || file.name.replace(/\\.pixil$/i, "")));
+      if (Array.isArray(importedPalette) && importedPalette.length) setPalette(importedPalette.map((value: unknown) => { const hex = String(value).replace(/^#/, ""); return /^[0-9a-f]{6}$/i.test(hex) ? "#" + hex : "#000000"; }));
+      setSelection(null); historyRef.current = []; futureRef.current = []; setStatus("Imported " + file.name + " · " + importedFrames.length + " frame(s), " + importedFrames[0].layers.length + " layers");
+    } catch (error) { setStatus(error instanceof Error ? "Import failed: " + error.message : "Import failed"); }
+    finally { setImporting(false); }
+  };
   const resizeCanvas = (width: number, height: number) => {
     if (!Number.isFinite(width) || !Number.isFinite(height) || width < 8 || height < 8 || width > 128 || height > 128) return;
     if (!window.confirm("Resize the canvas? Existing pixels will be cleared.")) return;
@@ -497,8 +547,9 @@ export default function PixelStudioEditor() {
     <main className={styles.studio}>
       <header className={styles.topbar}>
         <a className={styles.brand} href="/">CRYPTOPANIM <span>/ PIXEL LAB</span></a>
-        <div className={styles.document}><span className={styles.liveDot} /> UNTITLED.PANIM <span className={styles.saved}>LOCAL WORKSPACE</span></div>
+        <div className={styles.document}><span className={styles.liveDot} /> {documentName.toUpperCase()} <span className={styles.saved}>LOCAL WORKSPACE</span></div>
         <div className={styles.topActions}>
+          <label className={styles.export} style={{ cursor: importing ? "wait" : "pointer" }}>{importing ? "Importing…" : "Import .pixil"}<input type="file" accept=".pixil,application/json" disabled={importing} onChange={(event) => { const file = event.target.files?.[0]; if (file) void importPixil(file); event.currentTarget.value = ""; }} style={{ display: "none" }} /></label>
           <button type="button" onClick={undo} title="Undo (Ctrl+Z)">↶ Undo</button>
           <button type="button" onClick={redo} title="Redo (Ctrl+Y)">↷ Redo</button>
           <button type="button" className={styles.export} onClick={exportPng}>Export PNG ↗</button>
@@ -553,7 +604,7 @@ export default function PixelStudioEditor() {
             <div className={styles.panelHeading}><div><span className={styles.panelIcon}>▧</span><strong>LAYERS</strong></div><button type="button" onClick={addLayer}>＋ Add</button></div>
             <div className={styles.layerList}>{[...activeFrame.layers].reverse().map((layer) => <div key={layer.id} className={layer.id === activeLayerId ? styles.activeLayer : styles.layerRow}>
               <button type="button" className={styles.visibility} onClick={() => updateLayer(layer.id, { visible: !layer.visible })}>{layer.visible ? "◉" : "○"}</button>
-              <button type="button" className={styles.layerName} onClick={() => setActiveLayerId(layer.id)}>{layer.name}</button>
+              <button type="button" className={styles.layerName} onClick={() => setActiveLayerId(layer.id)} onDoubleClick={() => { const name = window.prompt("Layer name", layer.name); if (name?.trim()) updateLayer(layer.id, { name: name.trim() }); }} title="Click to select · double-click to rename">{layer.name}</button>
               <button type="button" className={styles.layerMove} onClick={() => moveLayer(layer.id, 1)} title="Move layer up">↑</button><button type="button" className={styles.layerMove} onClick={() => moveLayer(layer.id, -1)} title="Move layer down">↓</button>
               <button type="button" className={styles.layerMove} onClick={() => deleteLayer(layer.id)} title="Delete layer" disabled={activeFrame.layers.length <= 1}>×</button>
               <input aria-label={layer.name + " opacity"} type="range" min="0" max="100" value={layer.opacity} onChange={(e) => updateLayer(layer.id, { opacity: Number(e.target.value) })} />
