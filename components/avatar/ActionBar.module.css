@@ -1,17 +1,15 @@
 .bar {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   width: min(100%, 320px);
 }
-
 .row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-
-.row button {
+.row button, .saveOutfit {
   flex: 1 1 auto;
   min-height: 36px;
   padding: 8px 10px;
@@ -23,29 +21,21 @@
   line-height: 1;
   cursor: pointer;
 }
-
-.row button:hover:not(:disabled) {
-  border-color: var(--cyan);
-  color: var(--cyan);
+.row button:hover:not(:disabled) { border-color: var(--cyan); color: var(--cyan); }
+.row button:focus-visible, .saveOutfit:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.row button:disabled { opacity: .4; cursor: not-allowed; }
+.primary { background: #101820; border-color: var(--cyan); }
+.row button.primary:hover:not(:disabled) { background: var(--cyan); border-color: var(--cyan); color: #071016; }
+.saveOutfit {
+  width: 100%;
+  min-height: 46px;
+  border-color: var(--magenta);
+  background: linear-gradient(110deg, rgba(255,43,214,.14), rgba(62,224,255,.1));
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0 #05060b;
 }
-
-.row button:focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 2px;
-}
-
-.row button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.primary {
-  background: #101820;
-  border-color: var(--cyan);
-}
-
-.row button.primary:hover:not(:disabled) {
-  background: var(--cyan);
-  border-color: var(--cyan);
-  color: #071016;
-}
+.saveOutfit span { margin-right: 7px; color: var(--magenta); font-size: 18px; }
+.saveOutfit:hover { border-color: var(--cyan); color: var(--cyan); }
