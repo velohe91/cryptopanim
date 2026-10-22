@@ -539,7 +539,6 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
     name: background.name,
     category: "background" as const,
     blurb: `${background.name} background.`,
-    backgroundGroup: background.group,
     layers: [{ src: `/assets/background/${background.file}`, z: LAYER_Z.background }],
   })),
 ];
