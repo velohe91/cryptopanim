@@ -178,6 +178,7 @@ export function equipItem(equipped: EquippedAvatar, item: AvatarItem): EquippedA
       return {
         ...equipped,
         costumesId: item.id,
+        dressId: null,
         topId: null,
         bottomId: null,
         shoesId: null,
