@@ -36,6 +36,7 @@ export function InventoryPanel({
   const [bottomStyle, setBottomStyle] = useState("jeans");
   const [shoeStyle, setShoeStyle] = useState("sneakers");
   const [accessoryStyle, setAccessoryStyle] = useState("all");
+  const [backgroundStyle, setBackgroundStyle] = useState("based");
   const allItems = itemsInCategory(category, "all");
   const items = category === "hair"
     ? allItems.filter((item) => item.id.startsWith(`${hairStyle}-`) || (hairStyle === "high-bun" && item.id === "high-bun"))
@@ -47,6 +48,10 @@ export function InventoryPanel({
           ? allItems.filter((item) => item.id.startsWith(`${shoeStyle}-`) || item.id === "black-sneakers" || item.id === "blue-sneakers")
           : category === "accessory" && accessoryStyle !== "all"
             ? allItems.filter((item) => item.id.startsWith(`${accessoryStyle}-`))
+            : category === "background" && backgroundStyle !== "all"
+            ? allItems.filter((item) => backgroundStyle === "based"
+              ? ["background-grid", "background-pixel-blocks", "background-vertical-bars"].includes(item.id)
+              : !["background-grid", "background-pixel-blocks", "background-vertical-bars"].includes(item.id))
             : allItems;
   const selected = selectedId ? getItem(selectedId) : undefined;
 
@@ -135,6 +140,23 @@ export function InventoryPanel({
               label={label}
               active={shoeStyle === id}
               onClick={() => setShoeStyle(id)}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      {category === "background" ? (
+        <div className={styles.subtabs} role="tablist" aria-label="Background group">
+          {[
+            ["based", "Based Backgrounds"],
+            ["party", "Party Backgrounds"],
+            ["all", "All"],
+          ].map(([id, label]) => (
+            <SlotButton
+              key={id}
+              label={label}
+              active={backgroundStyle === id}
+              onClick={() => setBackgroundStyle(id)}
             />
           ))}
         </div>
