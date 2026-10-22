@@ -54,6 +54,7 @@ export default function PixelStudioEditor() {
   const [status, setStatus] = useState("Ready to create");
   const [selection, setSelection] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasScrollerRef = useRef<HTMLDivElement>(null);
   const drawingRef = useRef(false);
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const previewRef = useRef<string[] | null>(null);
@@ -157,6 +158,19 @@ export default function PixelStudioEditor() {
   }, [dimensions, composite, showGrid, zoom, onionSkin, frameIndex, frames, selection]);
 
   useEffect(() => { renderCanvas(); }, [renderCanvas]);
+
+  useEffect(() => {
+    const scroller = canvasScrollerRef.current;
+    if (!scroller) return;
+    const handleWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      if (event.deltaY === 0) return;
+      setZoom((current) => Math.max(4, Math.min(28, current + (event.deltaY < 0 ? 2 : -2))));
+    };
+    scroller.addEventListener("wheel", handleWheel, { passive: false });
+    return () => scroller.removeEventListener("wheel", handleWheel);
+  }, []);
 
   useEffect(() => {
     if (!playing) return;
@@ -436,7 +450,7 @@ export default function PixelStudioEditor() {
               <button type="button" onClick={() => setOnionSkin((v) => !v)} className={onionSkin ? styles.toggled : ""}>Onion skin</button>
             </div>
           </div>
-          <div className={styles.canvasScroller}>
+          <div className={styles.canvasScroller} ref={canvasScrollerRef}>
             <div className={styles.canvasChecker} style={{
               width: dimensions.width * zoom,
               height: dimensions.height * zoom,
