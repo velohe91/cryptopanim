@@ -67,6 +67,32 @@ const HAIR_ITEMS: AvatarItem[] = HAIR_STYLES.flatMap((style) =>
   })),
 );
 
+const SHOE_STYLES = [
+  {
+    id: "sneakers",
+    name: "Sneakers",
+    folder: "Sneakers",
+    colors: ["Based", "Black", "Blue", "Ocean", "Orange", "Sunny"],
+  },
+] as const;
+
+const SHOE_ITEMS: AvatarItem[] = SHOE_STYLES.flatMap((style) =>
+  style.colors.map((color) => ({
+    id: color === "Black"
+      ? "black-sneakers"
+      : color === "Blue"
+        ? "blue-sneakers"
+        : `${style.id}-${color.toLowerCase()}`,
+    name: `${style.name} · ${color}`,
+    category: "shoes" as const,
+    blurb: `${color} ${style.name.toLowerCase()}.`,
+    layers: [{
+      src: `/assets/shoes/${style.folder}/${color}.png`,
+      z: LAYER_Z.shoes,
+    }],
+  })),
+);
+
 const BOTTOM_STYLES = [
   {
     id: "jeans",
@@ -392,20 +418,7 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
 
   ...BOTTOM_ITEMS,
 
-  {
-    id: "black-sneakers",
-    name: "Black Sneakers",
-    category: "shoes",
-    blurb: "Black sneakers.",
-    layers: [{ src: "/assets/shoes/black sneakers.png", z: LAYER_Z.shoes }],
-  },
-  {
-    id: "blue-sneakers",
-    name: "Blue Sneakers",
-    category: "shoes",
-    blurb: "Blue sneakers.",
-    layers: [{ src: "/assets/shoes/blue sneakers.png", z: LAYER_Z.shoes }],
-  },
+  ...SHOE_ITEMS,
 
   {
     id: "cap",
