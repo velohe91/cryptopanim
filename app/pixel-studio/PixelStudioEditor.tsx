@@ -417,7 +417,7 @@ export default function PixelStudioEditor() {
         const sourceFrame = raw.frames[fi]; const sourceLayers = Array.isArray(sourceFrame.layers) ? sourceFrame.layers : [];
         const layers: Layer[] = [];
         for (const sourceLayer of sourceLayers) {
-          const src = typeof sourceLayer.src === "string" ? sourceLayer.src : "";
+          const src = typeof sourceLayer.src === "string" ? sourceLayer.src.replace(/^data:image\/png[^,]*,/i, "data:image/png;base64,") : "";
           const pixels = Array(width * height).fill(TRANSPARENT) as string[];
           if (src) {
             const image = new Image(); image.src = src;
