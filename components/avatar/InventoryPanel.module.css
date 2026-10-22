@@ -9,11 +9,24 @@
   box-shadow: 4px 4px 0 #07080f;
 }
 
-.tabs,
+/* Primary navigation: the main avatar categories. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 0 10px;
+  border-bottom: 3px solid var(--cyan);
+}
+
+/* Secondary navigation: filters within the selected category. */
 .subtabs {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  padding: 9px;
+  background: #111521;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--magenta);
 }
 
 .tab,
@@ -30,6 +43,19 @@
   font-size: 13px;
   line-height: 1;
   cursor: pointer;
+}
+
+.tab,
+.tabActive {
+  min-height: 36px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.subtab,
+.subtabActive {
+  font-size: 12px;
 }
 
 .tab:hover,
