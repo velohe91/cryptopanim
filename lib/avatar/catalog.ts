@@ -168,6 +168,22 @@ const SHOE_ITEMS: AvatarItem[] = SHOE_STYLES.flatMap((style) =>
   })),
 );
 
+const DRESS_ITEMS: AvatarItem[] = [
+  { file: "Based.png", id: "dress-based", name: "Dress · Based" },
+  { file: "Bitcoin.png", id: "dress-bitcoin", name: "Dress · Bitcoin" },
+  { file: "Bubblegum-Pink.png", id: "dress-bubblegum-pink", name: "Dress · Bubblegum Pink" },
+  { file: "Confetti-Rainbow-dress.png", id: "dress-confetti-rainbow", name: "Dress · Confetti Rainbow" },
+  { file: "Purple Royal-socks.png", id: "dress-purple-royal-socks", name: "Dress · Purple Royal Socks" },
+  { file: "Purple White-socks.png", id: "dress-purple-white-socks", name: "Dress · Purple White Socks" },
+  { file: "Red.png", id: "red-dress", name: "Red Dress" },
+].map((dress) => ({
+  id: dress.id,
+  name: dress.name,
+  category: "dress" as const,
+  blurb: `${dress.name} with matching shoes included.`,
+  layers: [{ src: `/assets/dress/${dress.file}`, z: LAYER_Z.top }],
+}));
+
 const BOTTOM_STYLES = [
   {
     id: "jeans",
@@ -483,13 +499,7 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
     blurb: "Witch-themed outfit.",
     layers: [{ src: "/assets/costumes/witch.png", z: LAYER_Z.top }],
   },
-  {
-    id: "red-dress",
-    name: "Red Dress",
-    category: "dress",
-    blurb: "Red dress.",
-    layers: [{ src: "/assets/dress/red-dress.png", z: LAYER_Z.top }],
-  },
+  ...DRESS_ITEMS,
 
   ...BOTTOM_ITEMS,
 
