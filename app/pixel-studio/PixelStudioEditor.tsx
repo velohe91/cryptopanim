@@ -443,7 +443,7 @@ export default function PixelStudioEditor() {
               backgroundSize: `${zoom * 2}px ${zoom * 2}px`,
               backgroundPosition: `0 0, 0 ${zoom}px, ${zoom}px -${zoom}px, -${zoom}px 0`,
             }}>
-              <canvas ref={canvasRef} style={{ width: dimensions.width * zoom, height: dimensions.height * zoom, imageRendering: "pixelated", touchAction: "none", cursor: tool === "eyedropper" ? "copy" : "crosshair" }} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} />
+              <canvas ref={canvasRef} style={{ width: dimensions.width * zoom, height: dimensions.height * zoom, imageRendering: "pixelated", touchAction: "none" }} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} />
             </div>
           </div>
           <footer className={styles.canvasFooter}><span>{status}</span><span>{tool.toUpperCase()} · {color.toUpperCase()}</span><span>PIXEL PERFECT MODE</span></footer>
