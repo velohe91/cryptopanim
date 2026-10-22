@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { getItem, itemsInCategory } from "@/lib/avatar/catalog";
 import { isEquipped } from "@/lib/avatar/equipped";
-import { CATEGORY_LABELS } from "@/lib/avatar/labels";
+import { CATEGORY_LABELS, SLOT_LABELS } from "@/lib/avatar/labels";
 import {
   AVATAR_CATEGORIES,
   AVATAR_FRAME,
