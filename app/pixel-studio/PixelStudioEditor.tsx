@@ -36,6 +36,7 @@ function pixelIndex(x: number, y: number, width: number) { return y * width + x;
 
 export default function PixelStudioEditor() {
   const [dimensions, setDimensions] = useState({ width: 32, height: 32 });
+  const [hydrated, setHydrated] = useState(false);
   const [frames, setFrames] = useState<Frame[]>([makeFrame(1, 32, 32, 1)]);
   const [frameIndex, setFrameIndex] = useState(0);
   const [activeLayerId, setActiveLayerId] = useState(1);
@@ -60,6 +61,37 @@ export default function PixelStudioEditor() {
   const futureRef = useRef<Snapshot[]>([]);
   const activeFrame = frames[frameIndex] ?? frames[0];
   const activeLayer = activeFrame.layers.find((layer) => layer.id === activeLayerId) ?? activeFrame.layers[activeFrame.layers.length - 1];
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("cryptopanim-pixel-studio-v1");
+      if (saved) {
+        const data = JSON.parse(saved) as { dimensions?: { width: number; height: number }; frames?: Frame[]; frameIndex?: number; activeLayerId?: number; nextId?: number; palette?: string[] };
+        if (data.dimensions && data.dimensions.width >= 8 && data.dimensions.width <= 128 && data.dimensions.height >= 8 && data.dimensions.height <= 128) setDimensions(data.dimensions);
+        if (Array.isArray(data.frames) && data.frames.length && data.frames.every((frame) => Array.isArray(frame.layers))) {
+          setFrames(data.frames);
+          setFrameIndex(Math.min(data.frameIndex ?? 0, data.frames.length - 1));
+          setActiveLayerId(data.activeLayerId ?? data.frames[0].layers[0]?.id ?? 1);
+          setNextId(data.nextId ?? 2);
+        }
+        if (Array.isArray(data.palette) && data.palette.every((item) => typeof item === "string")) setPalette(data.palette);
+        setStatus("Recovered local workspace");
+      }
+    } catch {
+      setStatus("Starting a fresh workspace");
+    } finally {
+      setHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem("cryptopanim-pixel-studio-v1", JSON.stringify({ dimensions, frames, frameIndex, activeLayerId, nextId, palette }));
+    } catch {
+      setStatus("Local storage is full — export your artwork to keep a backup");
+    }
+  }, [hydrated, dimensions, frames, frameIndex, activeLayerId, nextId, palette]);
+
   const composite = useMemo(() => {
     const pixels = Array(dimensions.width * dimensions.height).fill(TRANSPARENT) as string[];
     for (const layer of activeFrame.layers) {
