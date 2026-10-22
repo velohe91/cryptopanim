@@ -45,6 +45,11 @@ export function DressingRoom() {
         <div><p className={styles.kicker}>Pixel avatar system</p><h1>CRYPTOPANIM</h1></div>
         <div className={styles.room}>
           <p>Dressing Room</p>
+          <Link className={styles.studioButton} href="/pixel-studio">
+            <span aria-hidden="true">▦</span>
+            <span><strong>Panim Pixel Studio</strong><small>DRAW · ANIMATE · CREATE</small></span>
+            <span aria-hidden="true">↗</span>
+          </Link>
           <Link className={styles.save} href="/closet">My Closet ↗</Link>
         </div>
       </header>
