@@ -128,7 +128,9 @@ const ACCESSORY_STYLES = [
 
 const ACCESSORY_ITEMS: AvatarItem[] = ACCESSORY_STYLES.flatMap((style) =>
   style.colors.map((color) => ({
-    id: `${style.id}-${color.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, "")}`,
+    id: style.id === "headphones" && color === "Classic"
+      ? "headphones"
+      : `${style.id}-${color.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, "")}`,
     name: `${style.name} · ${color.trim()}`,
     category: "accessory" as const,
     slot: style.slot,
