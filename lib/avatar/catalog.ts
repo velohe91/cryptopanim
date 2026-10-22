@@ -67,6 +67,79 @@ const HAIR_ITEMS: AvatarItem[] = HAIR_STYLES.flatMap((style) =>
   })),
 );
 
+const ACCESSORY_STYLES = [
+  {
+    id: "dj-deck",
+    name: "DJ Deck",
+    folder: "DJ Deck",
+    slot: "hands",
+    z: LAYER_Z.hands,
+    colors: ["Base Beats", "Birthday Party", "Classic", "Electric Mint", "Neon Disco", "Purple Club"],
+  },
+  {
+    id: "geek-classes",
+    name: "Geek Classes",
+    folder: "Geek Classes",
+    slot: "head",
+    z: LAYER_Z.head,
+    colors: ["Birthday Pink", "Cherry Pop", "Classic Geek", "Cotton Candy", "Electric Blue", "Golden Party", "Mint Pixel", "Neon Purple", "Orange Soda", "Rainbow Arcade"],
+  },
+  {
+    id: "sun-glasses",
+    name: "Sun Glasses",
+    folder: "Sun Glasses",
+    slot: "head",
+    z: LAYER_Z.head,
+    colors: ["Sun Glasses"],
+  },
+  {
+    id: "ballons",
+    name: "Ballons",
+    folder: "ballons",
+    slot: "hands",
+    z: LAYER_Z.hands,
+    colors: ["Birthday Blue", "Bubblegum", "Confetti Green-Red", "Cotton Candy", "Mint Balloon", "Party ", "Party 2", "Party Purple-Blue", "Rainbow-Pop", "Sunshine-Yellow"],
+  },
+  {
+    id: "cakes",
+    name: "Cakes",
+    folder: "cakes",
+    slot: "hands",
+    z: LAYER_Z.hands,
+    colors: ["Blueberry Vanilla", "Carrot Spice", "Cotton Candy", "Midnight Chocolate", "Pistachio Cake", "Rainbow Sprinkle", "Strawberry Shortcake"],
+  },
+  {
+    id: "headphones",
+    name: "Headphones",
+    folder: "headphones",
+    slot: "head",
+    z: LAYER_Z.head,
+    colors: ["Aqua Pop", "Base Beats", "Birthday Fire", "Bubblegum Party", "Classic", "Confetti Mix", "Purple Disco"],
+  },
+  {
+    id: "party-hats",
+    name: "Party Hats",
+    folder: "party hats",
+    slot: "head",
+    z: LAYER_Z.head,
+    colors: ["Confetti", "Rainbow Pop", "Royal Birthday"],
+  },
+] as const;
+
+const ACCESSORY_ITEMS: AvatarItem[] = ACCESSORY_STYLES.flatMap((style) =>
+  style.colors.map((color) => ({
+    id: `${style.id}-${color.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, "")}`,
+    name: `${style.name} · ${color.trim()}`,
+    category: "accessory" as const,
+    slot: style.slot,
+    blurb: `${color.trim()} ${style.name.toLowerCase()} accessory.`,
+    layers: [{
+      src: `/assets/accessory/${style.folder}/${color}.png`,
+      z: style.z,
+    }],
+  })),
+);
+
 const SHOE_STYLES = [
   {
     id: "sneakers",
@@ -420,6 +493,7 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
 
   ...SHOE_ITEMS,
 
+  ...ACCESSORY_ITEMS,
   {
     id: "cap",
     name: "Cap",
@@ -427,14 +501,6 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
     slot: "head",
     blurb: "White cap with a visor.",
     layers: [{ src: "/assets/accessory/cap.png", z: LAYER_Z.head }],
-  },
-  {
-    id: "headphones",
-    name: "Headphones",
-    category: "accessory",
-    slot: "head",
-    blurb: "Headphones with music notes.",
-    layers: [{ src: "/assets/accessory/headphones.png", z: LAYER_Z.head }],
   },
 
   {
