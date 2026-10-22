@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { getItem, itemsInCategory } from "@/lib/avatar/catalog";
 import { isEquipped } from "@/lib/avatar/equipped";
-import { CATEGORY_LABELS, SLOT_LABELS } from "@/lib/avatar/labels";
+import { CATEGORY_LABELS } from "@/lib/avatar/labels";
 import {
-  ACCESSORY_SLOTS,
   AVATAR_CATEGORIES,
   AVATAR_FRAME,
   type AccessorySlot,
@@ -27,10 +26,8 @@ interface InventoryPanelProps {
 
 export function InventoryPanel({
   category,
-  accessorySlot,
   selectedId,
   onCategory,
-  onAccessorySlot,
   onSelect,
 }: InventoryPanelProps) {
   const { equipped } = useAvatar();
@@ -39,7 +36,7 @@ export function InventoryPanel({
   const [bottomStyle, setBottomStyle] = useState("jeans");
   const [shoeStyle, setShoeStyle] = useState("sneakers");
   const [accessoryStyle, setAccessoryStyle] = useState("all");
-  const allItems = itemsInCategory(category, accessorySlot);
+  const allItems = itemsInCategory(category, "all");
   const items = category === "hair"
     ? allItems.filter((item) => item.id.startsWith(`${hairStyle}-`) || (hairStyle === "high-bun" && item.id === "high-bun"))
     : category === "top"
@@ -161,21 +158,6 @@ export function InventoryPanel({
                 label={label}
                 active={accessoryStyle === id}
                 onClick={() => setAccessoryStyle(id)}
-              />
-            ))}
-          </div>
-          <div className={styles.subtabs} role="tablist" aria-label="Accessory slot">
-            <SlotButton
-              label="All Slots"
-              active={accessorySlot === "all"}
-              onClick={() => onAccessorySlot("all")}
-            />
-            {ACCESSORY_SLOTS.map((slot) => (
-              <SlotButton
-                key={slot}
-                label={SLOT_LABELS[slot]}
-                active={accessorySlot === slot}
-                onClick={() => onAccessorySlot(slot)}
               />
             ))}
           </div>
