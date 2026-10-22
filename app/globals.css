@@ -1,0 +1,37 @@
+:root {
+  --bg: #07080f;
+  --bg-raise: #10131c;
+  --line: #2a3148;
+  --line-strong: #46506f;
+  --text: #ebe8f6;
+  --muted: #8e93ab;
+  --cyan: #3ee0ff;
+  --magenta: #ff2bd6;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(62, 224, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(62, 224, 255, 0.035) 1px, transparent 1px);
+  background-size: 16px 16px;
+  color: var(--text);
+  font-family: var(--font-ui), "Courier New", monospace;
+}
+
+button,
+input {
+  font-family: inherit;
+}

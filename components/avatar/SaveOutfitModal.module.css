@@ -1,0 +1,37 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(4, 5, 12, .82);
+}
+.modal {
+  position: relative;
+  width: min(100%, 440px);
+  padding: 28px;
+  border: 2px solid var(--cyan);
+  background: #10131c;
+  box-shadow: 8px 8px 0 #05060b, 0 0 32px rgba(62,224,255,.12);
+}
+.closeIcon {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 28px;
+  cursor: pointer;
+}
+.kicker { margin: 0 0 12px; color: var(--magenta); font-size: 10px; letter-spacing: .08em; }
+.modal h2 { margin: 0 0 18px; color: var(--cyan); font-size: 20px; }
+.copy { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.modal form { display: grid; gap: 10px; }
+.modal label { font-size: 13px; }
+.modal input { width: 100%; min-height: 44px; padding: 10px; border: 1px solid var(--line-strong); background: #07080f; color: var(--text); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.actions button, .actions a { display: inline-flex; flex: 1 1 auto; align-items: center; justify-content: center; min-height: 42px; padding: 10px 12px; border: 2px solid var(--line-strong); background: #151927; color: var(--text); font: inherit; font-size: 12px; text-decoration: none; cursor: pointer; }
+.actions .primary { border-color: var(--cyan); background: var(--cyan); color: #071016; font-weight: 700; }
+.error { margin: 0; color: #ff8cba; font-size: 12px; }
