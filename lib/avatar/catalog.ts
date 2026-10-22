@@ -124,7 +124,7 @@ export const AVATAR_CATALOG: readonly AvatarItem[] = [
     category: "base",
     blurb: "Deep skin with hand-down pose.",
     layers: [{ src: "/assets/base/Deep/Deep Hand-down.png", z: LAYER_Z.base }],
-  }
+  },
   {
     id: "skin-light",
     name: "Light",
