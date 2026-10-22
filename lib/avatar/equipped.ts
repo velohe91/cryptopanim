@@ -167,7 +167,7 @@ export function equipItem(equipped: EquippedAvatar, item: AvatarItem): EquippedA
     case "bottom":
       return { ...equipped, bottomId: item.id };
     case "dress":
-      return { ...equipped, dressId: item.id };
+      return { ...equipped, dressId: item.id, shoesId: null };
     case "costumes":
       return { ...equipped, costumesId: item.id };
     case "shoes":
