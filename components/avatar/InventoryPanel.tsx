@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { getItem, itemsInCategory } from "@/lib/avatar/catalog";
 import { isEquipped } from "@/lib/avatar/equipped";
 import { CATEGORY_LABELS, SLOT_LABELS } from "@/lib/avatar/labels";
@@ -33,7 +34,11 @@ export function InventoryPanel({
   onSelect,
 }: InventoryPanelProps) {
   const { equipped } = useAvatar();
-  const items = itemsInCategory(category, accessorySlot);
+  const [hairStyle, setHairStyle] = useState("high-bun");
+  const allItems = itemsInCategory(category, accessorySlot);
+  const items = category === "hair"
+    ? allItems.filter((item) => item.id === "high-bun" || item.id.startsWith(`${hairStyle}-`))
+    : allItems;
   const selected = selectedId ? getItem(selectedId) : undefined;
 
   return (
@@ -55,6 +60,25 @@ export function InventoryPanel({
           );
         })}
       </div>
+
+      {category === "hair" ? (
+        <div className={styles.subtabs} role="tablist" aria-label="Hair style">
+          {[
+            ["high-bun", "High Bun"],
+            ["long-layered", "Long Layered"],
+            ["long-wave", "Long Wave"],
+            ["short-bob", "Short Bob"],
+            ["side-sweep", "Side Sweep"],
+          ].map(([id, label]) => (
+            <SlotButton
+              key={id}
+              label={label}
+              active={hairStyle === id}
+              onClick={() => setHairStyle(id)}
+            />
+          ))}
+        </div>
+      ) : null}
 
       {category === "accessory" ? (
         <div className={styles.subtabs} role="tablist" aria-label="Accessory slot">
