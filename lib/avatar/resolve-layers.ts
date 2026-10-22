@@ -20,7 +20,6 @@ export function resolveLayers(equipped: EquippedAvatar): ResolvedLayer[] {
   const ids: Array<string | null | undefined> = [
     equipped.backgroundId,
     equipped.hairId,
-    equipped.skinId,
     equipped.baseId,
     equipped.bottomId,
     equipped.dressId,
