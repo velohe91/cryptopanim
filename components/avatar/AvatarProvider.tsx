@@ -17,6 +17,7 @@ interface AvatarContextValue {
   reset: () => void;
   naked: () => void;
   undo: () => void;
+  loadOutfit: (equipped: EquippedAvatar) => void;
 }
 
 const AvatarContext = createContext<AvatarContextValue | null>(null);
@@ -33,6 +34,7 @@ export function AvatarProvider({ children }: { children: ReactNode }) {
       reset: () => dispatchAvatar({ type: "reset" }),
       naked: () => dispatchAvatar({ type: "naked" }),
       undo: () => dispatchAvatar({ type: "undo" }),
+      loadOutfit: (equipped) => dispatchAvatar({ type: "hydrate", equipped }),
     }),
     [state],
   );
@@ -42,8 +44,6 @@ export function AvatarProvider({ children }: { children: ReactNode }) {
 
 export function useAvatar(): AvatarContextValue {
   const value = useContext(AvatarContext);
-  if (!value) {
-    throw new Error("useAvatar must be used within AvatarProvider");
-  }
+  if (!value) throw new Error("useAvatar must be used within AvatarProvider");
   return value;
 }
