@@ -38,6 +38,7 @@ export function InventoryPanel({
   const [topStyle, setTopStyle] = useState("casual");
   const [bottomStyle, setBottomStyle] = useState("jeans");
   const [shoeStyle, setShoeStyle] = useState("sneakers");
+  const [accessoryStyle, setAccessoryStyle] = useState("all");
   const allItems = itemsInCategory(category, accessorySlot);
   const items = category === "hair"
     ? allItems.filter((item) => item.id.startsWith(`${hairStyle}-`) || (hairStyle === "high-bun" && item.id === "high-bun"))
@@ -47,7 +48,9 @@ export function InventoryPanel({
         ? allItems.filter((item) => item.id.startsWith(`${bottomStyle}-`) || (bottomStyle === "jeans" && item.id === "pants") || (bottomStyle === "shorts" && item.id === "shorts"))
         : category === "shoes"
           ? allItems.filter((item) => item.id.startsWith(`${shoeStyle}-`) || item.id === "black-sneakers" || item.id === "blue-sneakers")
-          : allItems;
+          : category === "accessory" && accessoryStyle !== "all"
+            ? allItems.filter((item) => item.id.startsWith(`${accessoryStyle}-`))
+            : allItems;
   const selected = selectedId ? getItem(selectedId) : undefined;
 
   return (
@@ -141,21 +144,42 @@ export function InventoryPanel({
       ) : null}
 
       {category === "accessory" ? (
-        <div className={styles.subtabs} role="tablist" aria-label="Accessory slot">
-          <SlotButton
-            label="All"
-            active={accessorySlot === "all"}
-            onClick={() => onAccessorySlot("all")}
-          />
-          {ACCESSORY_SLOTS.map((slot) => (
+        <>
+          <div className={styles.subtabs} role="tablist" aria-label="Accessory category">
+            {[
+              ["all", "All"],
+              ["dj-deck", "DJ Deck"],
+              ["geek-classes", "Geek Classes"],
+              ["sun-glasses", "Sun Glasses"],
+              ["ballons", "Ballons"],
+              ["cakes", "Cakes"],
+              ["headphones", "Headphones"],
+              ["party-hats", "Party Hats"],
+            ].map(([id, label]) => (
+              <SlotButton
+                key={id}
+                label={label}
+                active={accessoryStyle === id}
+                onClick={() => setAccessoryStyle(id)}
+              />
+            ))}
+          </div>
+          <div className={styles.subtabs} role="tablist" aria-label="Accessory slot">
             <SlotButton
-              key={slot}
-              label={SLOT_LABELS[slot]}
-              active={accessorySlot === slot}
-              onClick={() => onAccessorySlot(slot)}
+              label="All Slots"
+              active={accessorySlot === "all"}
+              onClick={() => onAccessorySlot("all")}
             />
-          ))}
-        </div>
+            {ACCESSORY_SLOTS.map((slot) => (
+              <SlotButton
+                key={slot}
+                label={SLOT_LABELS[slot]}
+                active={accessorySlot === slot}
+                onClick={() => onAccessorySlot(slot)}
+              />
+            ))}
+          </div>
+        </>
       ) : null}
 
       <ul className={styles.grid}>
