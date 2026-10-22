@@ -1,0 +1,449 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import styles from "./PixelStudioEditor.module.css";
+
+type Tool = "pencil" | "eraser" | "fill" | "eyedropper" | "line" | "rect" | "ellipse" | "select" | "text";
+type Layer = { id: number; name: string; visible: boolean; opacity: number; pixels: string[] };
+type Frame = { id: number; duration: number; layers: Layer[] };
+type Snapshot = { frames: Frame[]; frameIndex: number; layerId: number };
+const TRANSPARENT = "";
+
+const TOOL_LIST: { id: Tool; label: string; icon: string; group: string }[] = [
+  { id: "pencil", label: "Pencil (B)", icon: "✎", group: "DRAW" },
+  { id: "eraser", label: "Eraser (E)", icon: "▱", group: "DRAW" },
+  { id: "fill", label: "Bucket (G)", icon: "▨", group: "DRAW" },
+  { id: "eyedropper", label: "Eyedropper (I)", icon: "⌕", group: "DRAW" },
+  { id: "line", label: "Line (L)", icon: "／", group: "SHAPES" },
+  { id: "rect", label: "Rectangle (U)", icon: "□", group: "SHAPES" },
+  { id: "ellipse", label: "Ellipse (O)", icon: "◯", group: "SHAPES" },
+  { id: "select", label: "Selection (M)", icon: "▧", group: "EDIT" },
+  { id: "text", label: "Pixel text (T)", icon: "T", group: "EDIT" },
+];
+
+const DEFAULT_PALETTE = ["#171923", "#ffffff", "#c4b5fd", "#a78bfa", "#7c3aed", "#3ee0ff", "#00a6a6", "#6fcf97", "#f6c177", "#f38ba8", "#e76f51", "#8b5e3c", "#5d7290", "#38465f", "#737994", "#000000"];
+
+function makeLayer(id: number, width: number, height: number, name: string): Layer {
+  return { id, name, visible: true, opacity: 100, pixels: Array(width * height).fill(TRANSPARENT) };
+}
+function makeFrame(id: number, width: number, height: number, layerId: number): Frame {
+  return { id, duration: 120, layers: [makeLayer(layerId, width, height, "Layer 1")] };
+}
+function cloneFrames(frames: Frame[]): Frame[] {
+  return frames.map((frame) => ({ ...frame, layers: frame.layers.map((layer) => ({ ...layer, pixels: [...layer.pixels] })) }));
+}
+function pixelIndex(x: number, y: number, width: number) { return y * width + x; }
+
+export default function PixelStudioEditor() {
+  const [dimensions, setDimensions] = useState({ width: 32, height: 32 });
+  const [frames, setFrames] = useState<Frame[]>([makeFrame(1, 32, 32, 1)]);
+  const [frameIndex, setFrameIndex] = useState(0);
+  const [activeLayerId, setActiveLayerId] = useState(1);
+  const [nextId, setNextId] = useState(2);
+  const [tool, setTool] = useState<Tool>("pencil");
+  const [color, setColor] = useState("#c4b5fd");
+  const [palette, setPalette] = useState(DEFAULT_PALETTE);
+  const [brushSize, setBrushSize] = useState(1);
+  const [zoom, setZoom] = useState(12);
+  const [showGrid, setShowGrid] = useState(true);
+  const [symmetry, setSymmetry] = useState(false);
+  const [dither, setDither] = useState(false);
+  const [onionSkin, setOnionSkin] = useState(true);
+  const [playing, setPlaying] = useState(false);
+  const [status, setStatus] = useState("Ready to create");
+  const [selection, setSelection] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const drawingRef = useRef(false);
+  const startRef = useRef<{ x: number; y: number } | null>(null);
+  const previewRef = useRef<string[] | null>(null);
+  const historyRef = useRef<Snapshot[]>([]);
+  const futureRef = useRef<Snapshot[]>([]);
+  const activeFrame = frames[frameIndex] ?? frames[0];
+  const activeLayer = activeFrame.layers.find((layer) => layer.id === activeLayerId) ?? activeFrame.layers[activeFrame.layers.length - 1];
+  const composite = useMemo(() => {
+    const pixels = Array(dimensions.width * dimensions.height).fill(TRANSPARENT) as string[];
+    for (const layer of activeFrame.layers) {
+      if (!layer.visible || layer.opacity <= 0) continue;
+      layer.pixels.forEach((value, i) => { if (value) pixels[i] = value; });
+    }
+    return pixels;
+  }, [activeFrame, dimensions]);
+
+  const remember = useCallback(() => {
+    historyRef.current.push({ frames: cloneFrames(frames), frameIndex, layerId: activeLayerId });
+    if (historyRef.current.length > 80) historyRef.current.shift();
+    futureRef.current = [];
+  }, [frames, frameIndex, activeLayerId]);
+
+  const updateActiveLayer = useCallback((pixels: string[]) => {
+    setFrames((current) => current.map((frame, i) => i !== frameIndex ? frame : ({
+      ...frame,
+      layers: frame.layers.map((layer) => layer.id === activeLayerId ? { ...layer, pixels } : layer),
+    })));
+  }, [frameIndex, activeLayerId]);
+
+  const renderCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const { width, height } = dimensions;
+    canvas.width = width;
+    canvas.height = height;
+    ctx.clearRect(0, 0, width, height);
+    const drawPixels = (pixels: string[], alpha = 1) => {
+      ctx.globalAlpha = alpha;
+      pixels.forEach((value, i) => {
+        if (!value) return;
+        ctx.fillStyle = value;
+        ctx.fillRect(i % width, Math.floor(i / width), 1, 1);
+      });
+    };
+    if (onionSkin && frameIndex > 0) {
+      const previous = frames[frameIndex - 1];
+      const merged = Array(width * height).fill(TRANSPARENT) as string[];
+      previous.layers.filter((layer) => layer.visible).forEach((layer) => layer.pixels.forEach((v, i) => { if (v) merged[i] = v; }));
+      drawPixels(merged, 0.22);
+    }
+    drawPixels(previewRef.current ?? composite);
+    ctx.globalAlpha = 1;
+    if (showGrid && zoom >= 8) {
+      ctx.strokeStyle = "rgba(142, 147, 171, .28)";
+      ctx.lineWidth = 0.04;
+      ctx.beginPath();
+      for (let x = 0; x <= width; x++) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
+      for (let y = 0; y <= height; y++) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
+      ctx.stroke();
+    }
+    if (selection) {
+      ctx.strokeStyle = "#3ee0ff";
+      ctx.lineWidth = 0.16;
+      ctx.setLineDash([0.5, 0.5]);
+      ctx.strokeRect(selection.x, selection.y, selection.w, selection.h);
+      ctx.setLineDash([]);
+    }
+  }, [dimensions, composite, showGrid, zoom, onionSkin, frameIndex, frames, selection]);
+
+  useEffect(() => { renderCanvas(); }, [renderCanvas]);
+
+  useEffect(() => {
+    if (!playing) return;
+    const timer = window.setInterval(() => setFrameIndex((index) => (index + 1) % frames.length), Math.max(40, activeFrame.duration));
+    return () => window.clearInterval(timer);
+  }, [playing, frames.length, activeFrame.duration]);
+
+  const pointFromEvent = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return {
+      x: Math.max(0, Math.min(dimensions.width - 1, Math.floor((event.clientX - rect.left) / rect.width * dimensions.width))),
+      y: Math.max(0, Math.min(dimensions.height - 1, Math.floor((event.clientY - rect.top) / rect.height * dimensions.height))),
+    };
+  };
+
+  const stamp = (pixels: string[], x: number, y: number, value: string) => {
+    const half = Math.floor(brushSize / 2);
+    for (let dy = -half; dy < brushSize - half; dy++) for (let dx = -half; dx < brushSize - half; dx++) {
+      const px = x + dx; const py = y + dy;
+      if (px < 0 || py < 0 || px >= dimensions.width || py >= dimensions.height) continue;
+      if (dither && (px + py) % 2) continue;
+      pixels[pixelIndex(px, py, dimensions.width)] = value;
+      if (symmetry) pixels[pixelIndex(dimensions.width - 1 - px, py, dimensions.width)] = value;
+    }
+  };
+
+  const drawLine = (pixels: string[], x0: number, y0: number, x1: number, y1: number, value: string) => {
+    let dx = Math.abs(x1 - x0); let sx = x0 < x1 ? 1 : -1;
+    let dy = -Math.abs(y1 - y0); let sy = y0 < y1 ? 1 : -1; let err = dx + dy;
+    while (true) {
+      stamp(pixels, x0, y0, value);
+      if (x0 === x1 && y0 === y1) break;
+      const e2 = 2 * err;
+      if (e2 >= dy) { err += dy; x0 += sx; }
+      if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+  };
+
+  const floodFill = (pixels: string[], x: number, y: number) => {
+    const start = pixelIndex(x, y, dimensions.width);
+    const target = pixels[start];
+    if (target === color) return pixels;
+    const result = [...pixels];
+    const stack = [start];
+    while (stack.length) {
+      const i = stack.pop()!;
+      if (result[i] !== target) continue;
+      result[i] = color;
+      const px = i % dimensions.width; const py = Math.floor(i / dimensions.width);
+      if (px > 0) stack.push(i - 1);
+      if (px < dimensions.width - 1) stack.push(i + 1);
+      if (py > 0) stack.push(i - dimensions.width);
+      if (py < dimensions.height - 1) stack.push(i + dimensions.width);
+    }
+    return result;
+  };
+
+  const pointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (playing) setPlaying(false);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const point = pointFromEvent(event);
+    if (tool === "eyedropper") {
+      const value = composite[pixelIndex(point.x, point.y, dimensions.width)];
+      if (value) setColor(value);
+      return;
+    }
+    if (tool === "text") {
+      const text = window.prompt("Text to pixelate (short text works best):");
+      if (!text) return;
+      remember();
+      const pixels = [...activeLayer.pixels];
+      const offscreen = document.createElement("canvas");
+      offscreen.width = dimensions.width; offscreen.height = dimensions.height;
+      const ctx = offscreen.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = color; ctx.font = "6px monospace"; ctx.textBaseline = "top";
+        ctx.fillText(text.slice(0, 24), point.x, point.y);
+        const image = ctx.getImageData(0, 0, dimensions.width, dimensions.height);
+        for (let i = 0; i < image.data.length; i += 4) if (image.data[i + 3]) pixels[i / 4] = color;
+        updateActiveLayer(pixels); setStatus("Pixel text added");
+      }
+      return;
+    }
+    if (tool === "fill") { remember(); updateActiveLayer(floodFill([...activeLayer.pixels], point.x, point.y)); setStatus("Area filled"); return; }
+    if (tool === "select") { startRef.current = point; drawingRef.current = true; setSelection({ x: point.x, y: point.y, w: 1, h: 1 }); return; }
+    remember();
+    drawingRef.current = true;
+    startRef.current = point;
+    if (tool === "pencil" || tool === "eraser") {
+      const pixels = [...activeLayer.pixels];
+      stamp(pixels, point.x, point.y, tool === "eraser" ? TRANSPARENT : color);
+      updateActiveLayer(pixels);
+    } else {
+      previewRef.current = [...activeLayer.pixels];
+      renderCanvas();
+    }
+  };
+
+  const pointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!drawingRef.current || !startRef.current) return;
+    const point = pointFromEvent(event);
+    if (tool === "select") {
+      const start = startRef.current;
+      setSelection({ x: Math.min(start.x, point.x), y: Math.min(start.y, point.y), w: Math.abs(point.x - start.x) + 1, h: Math.abs(point.y - start.y) + 1 });
+      return;
+    }
+    if (tool === "pencil" || tool === "eraser") {
+      const pixels = [...activeLayer.pixels];
+      stamp(pixels, point.x, point.y, tool === "eraser" ? TRANSPARENT : color);
+      updateActiveLayer(pixels);
+      return;
+    }
+    const start = startRef.current;
+    const pixels = [...activeLayer.pixels];
+    const value = tool === "eraser" ? TRANSPARENT : color;
+    if (tool === "line") drawLine(pixels, start.x, start.y, point.x, point.y, value);
+    if (tool === "rect") {
+      for (let x = Math.min(start.x, point.x); x <= Math.max(start.x, point.x); x++) { stamp(pixels, x, start.y, value); stamp(pixels, x, point.y, value); }
+      for (let y = Math.min(start.y, point.y); y <= Math.max(start.y, point.y); y++) { stamp(pixels, start.x, y, value); stamp(pixels, point.x, y, value); }
+    }
+    if (tool === "ellipse") {
+      const cx = (start.x + point.x) / 2; const cy = (start.y + point.y) / 2;
+      const rx = Math.max(0.5, Math.abs(point.x - start.x) / 2); const ry = Math.max(0.5, Math.abs(point.y - start.y) / 2);
+      for (let y = Math.floor(Math.min(start.y, point.y)); y <= Math.ceil(Math.max(start.y, point.y)); y++) for (let x = Math.floor(Math.min(start.x, point.x)); x <= Math.ceil(Math.max(start.x, point.x)); x++) {
+        const edge = Math.abs(((x - cx) ** 2) / (rx ** 2) + ((y - cy) ** 2) / (ry ** 2) - 1) < 0.55;
+        if (edge) stamp(pixels, x, y, value);
+      }
+    }
+    previewRef.current = pixels;
+    renderCanvas();
+  };
+
+  const pointerUp = () => {
+    if (!drawingRef.current) return;
+    if (previewRef.current && startRef.current && (tool === "line" || tool === "rect" || tool === "ellipse")) {
+      updateActiveLayer(previewRef.current);
+      setStatus("Shape drawn");
+    }
+    drawingRef.current = false;
+    startRef.current = null;
+    previewRef.current = null;
+  };
+
+  const undo = () => {
+    const snapshot = historyRef.current.pop();
+    if (!snapshot) return;
+    futureRef.current.push({ frames: cloneFrames(frames), frameIndex, layerId: activeLayerId });
+    setFrames(snapshot.frames); setFrameIndex(snapshot.frameIndex); setActiveLayerId(snapshot.layerId); setStatus("Undo");
+  };
+  const redo = () => {
+    const snapshot = futureRef.current.pop();
+    if (!snapshot) return;
+    historyRef.current.push({ frames: cloneFrames(frames), frameIndex, layerId: activeLayerId });
+    setFrames(snapshot.frames); setFrameIndex(snapshot.frameIndex); setActiveLayerId(snapshot.layerId); setStatus("Redo");
+  };
+  const addFrame = (duplicate = false) => {
+    const id = nextId;
+    const frame: Frame = duplicate
+      ? { ...activeFrame, id, layers: activeFrame.layers.map((layer) => ({ ...layer, id: id * 1000 + layer.id, pixels: [...layer.pixels], name: layer.name })) }
+      : makeFrame(id, dimensions.width, dimensions.height, id * 1000);
+    setFrames((current) => [...current, frame]); setFrameIndex(frames.length); setActiveLayerId(frame.layers[frame.layers.length - 1].id);
+    setNextId(id + 1); setStatus(duplicate ? "Frame duplicated" : "Frame added");
+  };
+  const removeFrame = () => {
+    if (frames.length <= 1) return;
+    const next = frames.filter((_, i) => i !== frameIndex);
+    setFrames(next); setFrameIndex(Math.max(0, frameIndex - 1)); setActiveLayerId(next[Math.max(0, frameIndex - 1)].layers[0].id); setStatus("Frame removed");
+  };
+  const addLayer = () => {
+    const id = nextId;
+    const layer = makeLayer(id, dimensions.width, dimensions.height, "Layer " + (activeFrame.layers.length + 1));
+    setFrames((current) => current.map((frame, i) => i === frameIndex ? { ...frame, layers: [...frame.layers, layer] } : frame));
+    setActiveLayerId(id); setNextId(id + 1); setStatus("Layer added");
+  };
+  const updateLayer = (id: number, patch: Partial<Layer>) => setFrames((current) => current.map((frame, i) => i !== frameIndex ? frame : ({ ...frame, layers: frame.layers.map((layer) => layer.id === id ? { ...layer, ...patch } : layer) })));
+  const deleteLayer = (id: number) => {
+    if (activeFrame.layers.length <= 1) return;
+    const layers = activeFrame.layers.filter((layer) => layer.id !== id);
+    setFrames((current) => current.map((frame, i) => i === frameIndex ? { ...frame, layers } : frame));
+    if (activeLayerId === id) setActiveLayerId(layers[layers.length - 1].id);
+  };
+  const moveLayer = (id: number, direction: -1 | 1) => {
+    const layers = [...activeFrame.layers];
+    const index = layers.findIndex((layer) => layer.id === id);
+    const target = index + direction;
+    if (target < 0 || target >= layers.length) return;
+    [layers[index], layers[target]] = [layers[target], layers[index]];
+    setFrames((current) => current.map((frame, i) => i === frameIndex ? { ...frame, layers } : frame));
+  };
+
+  const exportPng = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = dimensions.width; canvas.height = dimensions.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const image = ctx.createImageData(dimensions.width, dimensions.height);
+    composite.forEach((value, i) => {
+      if (!value) return;
+      const hex = value.replace("#", "");
+      const n = Number.parseInt(hex, 16);
+      image.data[i * 4] = (n >> 16) & 255; image.data[i * 4 + 1] = (n >> 8) & 255; image.data[i * 4 + 2] = n & 255; image.data[i * 4 + 3] = 255;
+    });
+    ctx.putImageData(image, 0, 0);
+    const link = document.createElement("a"); link.download = "panim-pixel-art.png"; link.href = canvas.toDataURL("image/png"); link.click();
+    setStatus("PNG exported");
+  };
+  const exportGifFallback = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = dimensions.width; canvas.height = dimensions.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const image = ctx.createImageData(dimensions.width, dimensions.height);
+    composite.forEach((value, i) => {
+      if (!value) return;
+      const n = Number.parseInt(value.slice(1), 16);
+      image.data[i * 4] = (n >> 16) & 255; image.data[i * 4 + 1] = (n >> 8) & 255; image.data[i * 4 + 2] = n & 255; image.data[i * 4 + 3] = 255;
+    });
+    ctx.putImageData(image, 0, 0);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = "panim-frame.png"; link.click(); URL.revokeObjectURL(url);
+      setStatus("Current frame exported as PNG");
+    });
+  };
+  const clearLayer = () => { remember(); updateActiveLayer(Array(dimensions.width * dimensions.height).fill(TRANSPARENT)); setStatus("Layer cleared"); };
+  const resizeCanvas = (width: number, height: number) => {
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width < 8 || height < 8 || width > 128 || height > 128) return;
+    if (!window.confirm("Resize the canvas? Existing pixels will be cleared.")) return;
+    const nextFrames = frames.map((frame) => ({ ...frame, layers: frame.layers.map((layer) => ({ ...layer, pixels: Array(width * height).fill(TRANSPARENT) })) }));
+    setDimensions({ width, height }); setFrames(nextFrames); setSelection(null); setStatus("Canvas resized");
+  };
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") { event.preventDefault(); undo(); return; }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") { event.preventDefault(); redo(); return; }
+      const keyTools: Record<string, Tool> = { b: "pencil", e: "eraser", g: "fill", i: "eyedropper", l: "line", u: "rect", o: "ellipse", m: "select", t: "text" };
+      if (keyTools[event.key.toLowerCase()]) setTool(keyTools[event.key.toLowerCase()]);
+      if (event.key === "[") setBrushSize((size) => Math.max(1, size - 1));
+      if (event.key === "]") setBrushSize((size) => Math.min(8, size + 1));
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
+  const toolGroups = ["DRAW", "SHAPES", "EDIT"];
+  return (
+    <main className={styles.studio}>
+      <header className={styles.topbar}>
+        <a className={styles.brand} href="/">CRYPTOPANIM <span>/ PIXEL LAB</span></a>
+        <div className={styles.document}><span className={styles.liveDot} /> UNTITLED.PANIM <span className={styles.saved}>LOCAL WORKSPACE</span></div>
+        <div className={styles.topActions}>
+          <button type="button" onClick={undo} title="Undo (Ctrl+Z)">↶ Undo</button>
+          <button type="button" onClick={redo} title="Redo (Ctrl+Y)">↷ Redo</button>
+          <button type="button" className={styles.export} onClick={exportPng}>Export PNG ↗</button>
+        </div>
+      </header>
+      <section className={styles.workspace}>
+        <aside className={styles.toolRail} aria-label="Drawing tools">
+          {toolGroups.map((group) => <div className={styles.toolGroup} key={group}><span className={styles.groupLabel}>{group}</span>
+            {TOOL_LIST.filter((item) => item.group === group).map((item) => <button type="button" key={item.id} className={tool === item.id ? styles.activeTool : styles.toolButton} onClick={() => setTool(item.id)} title={item.label} aria-label={item.label}><span>{item.icon}</span><small>{item.label.split(" (")[0]}</small></button>)}
+          </div>)}
+          <div className={styles.toolOptions}>
+            <label>BRUSH <strong>{brushSize}px</strong><input type="range" min="1" max="8" value={brushSize} onChange={(e) => setBrushSize(Number(e.target.value))} /></label>
+            <label className={styles.check}><input type="checkbox" checked={symmetry} onChange={(e) => setSymmetry(e.target.checked)} /> Mirror</label>
+            <label className={styles.check}><input type="checkbox" checked={dither} onChange={(e) => setDither(e.target.checked)} /> Dither</label>
+            <label className={styles.check}><input type="checkbox" checked={showGrid} onChange={(e) => setShowGrid(e.target.checked)} /> Grid</label>
+          </div>
+        </aside>
+        <section className={styles.canvasArea} aria-label="Pixel canvas">
+          <div className={styles.canvasToolbar}>
+            <span>CANVAS <b>{dimensions.width} × {dimensions.height}</b></span>
+            <div className={styles.canvasControls}>
+              <button type="button" onClick={() => setZoom((v) => Math.max(4, v - 2))}>−</button><span>{Math.round(zoom / 12 * 100)}%</span><button type="button" onClick={() => setZoom((v) => Math.min(28, v + 2))}>+</button>
+              <button type="button" onClick={() => setOnionSkin((v) => !v)} className={onionSkin ? styles.toggled : ""}>Onion skin</button>
+            </div>
+          </div>
+          <div className={styles.canvasScroller}>
+            <div className={styles.canvasChecker} style={{ width: dimensions.width * zoom, height: dimensions.height * zoom }}>
+              <canvas ref={canvasRef} style={{ width: dimensions.width * zoom, height: dimensions.height * zoom, imageRendering: "pixelated", touchAction: "none", cursor: tool === "eyedropper" ? "copy" : "crosshair" }} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} />
+            </div>
+          </div>
+          <footer className={styles.canvasFooter}><span>{status}</span><span>{tool.toUpperCase()} · {color.toUpperCase()}</span><span>PIXEL PERFECT MODE</span></footer>
+          <div className={styles.timeline}>
+            <div className={styles.panelHeading}><div><span className={styles.panelIcon}>▤</span><strong>ANIMATION TIMELINE</strong><small>{frames.length} FRAME{frames.length === 1 ? "" : "S"}</small></div><div className={styles.panelActions}><button type="button" onClick={() => setPlaying((v) => !v)}>{playing ? "Ⅱ Pause" : "▶ Play"}</button><button type="button" onClick={() => addFrame(false)}>＋ Frame</button><button type="button" onClick={() => addFrame(true)}>⧉ Duplicate</button><button type="button" onClick={removeFrame} disabled={frames.length <= 1}>−</button></div></div>
+            <div className={styles.frameStrip}>{frames.map((frame, index) => <button type="button" key={frame.id} onClick={() => { setFrameIndex(index); setActiveLayerId(frame.layers[frame.layers.length - 1].id); }} className={index === frameIndex ? styles.activeFrame : styles.frameButton}><span className={styles.frameMini}>{frame.layers.filter((layer) => layer.visible).flatMap((layer) => layer.pixels).some(Boolean) ? "▦" : "＋"}</span><span>F{index + 1}</span><small>{frame.duration}ms</small></button>)}</div>
+            <label className={styles.duration}>FRAME DURATION <input type="number" min="40" max="2000" step="20" value={activeFrame.duration} onChange={(e) => setFrames((current) => current.map((frame, i) => i === frameIndex ? { ...frame, duration: Math.max(40, Number(e.target.value)) } : frame))} /> ms</label>
+          </div>
+        </section>
+        <aside className={styles.properties}>
+          <section className={styles.panel}>
+            <div className={styles.panelHeading}><div><span className={styles.panelIcon}>◈</span><strong>COLOR LAB</strong></div><button type="button" onClick={() => setPalette((p) => [...p, color])} title="Add current color to palette">＋</button></div>
+            <div className={styles.currentColor}><input aria-label="Current color" type="color" value={color} onChange={(e) => setColor(e.target.value)} /><div><small>ACTIVE COLOR</small><strong>{color.toUpperCase()}</strong></div></div>
+            <div className={styles.swatches}>{palette.map((swatch, i) => <button type="button" key={swatch + i} title={swatch} style={{ background: swatch }} className={color === swatch ? styles.selectedSwatch : ""} onClick={() => setColor(swatch)} />)}</div>
+            <label className={styles.paletteInput}>HEX COLOR <input value={color} onChange={(e) => /^#[0-9a-fA-F]{0,6}$/.test(e.target.value) && setColor(e.target.value)} maxLength={7} /></label>
+            <button type="button" className={styles.fullButton} onClick={() => setPalette(DEFAULT_PALETTE)}>Reset default palette</button>
+          </section>
+          <section className={styles.panel}>
+            <div className={styles.panelHeading}><div><span className={styles.panelIcon}>▧</span><strong>LAYERS</strong></div><button type="button" onClick={addLayer}>＋ Add</button></div>
+            <div className={styles.layerList}>{[...activeFrame.layers].reverse().map((layer) => <div key={layer.id} className={layer.id === activeLayerId ? styles.activeLayer : styles.layerRow}>
+              <button type="button" className={styles.visibility} onClick={() => updateLayer(layer.id, { visible: !layer.visible })}>{layer.visible ? "◉" : "○"}</button>
+              <button type="button" className={styles.layerName} onClick={() => setActiveLayerId(layer.id)}>{layer.name}</button>
+              <button type="button" className={styles.layerMove} onClick={() => moveLayer(layer.id, 1)} title="Move layer up">↑</button><button type="button" className={styles.layerMove} onClick={() => moveLayer(layer.id, -1)} title="Move layer down">↓</button>
+              <button type="button" className={styles.layerMove} onClick={() => deleteLayer(layer.id)} title="Delete layer" disabled={activeFrame.layers.length <= 1}>×</button>
+              <input aria-label={layer.name + " opacity"} type="range" min="0" max="100" value={layer.opacity} onChange={(e) => updateLayer(layer.id, { opacity: Number(e.target.value) })} />
+            </div>)}</div>
+          </section>
+          <section className={styles.panel}>
+            <div className={styles.panelHeading}><div><span className={styles.panelIcon}>⚙</span><strong>DOCUMENT</strong></div></div>
+            <div className={styles.dimensionFields}><label>WIDTH<input type="number" min="8" max="128" defaultValue={dimensions.width} key={"w" + dimensions.width} id="studio-width" /></label><span>×</span><label>HEIGHT<input type="number" min="8" max="128" defaultValue={dimensions.height} key={"h" + dimensions.height} id="studio-height" /></label></div>
+            <button type="button" className={styles.fullButton} onClick={() => resizeCanvas(Number((document.getElementById("studio-width") as HTMLInputElement)?.value), Number((document.getElementById("studio-height") as HTMLInputElement)?.value))}>Resize canvas</button>
+            <button type="button" className={styles.dangerButton} onClick={clearLayer}>Clear active layer</button>
+            <button type="button" className={styles.fullButton} onClick={exportGifFallback}>Export frame PNG</button>
+          </section>
+        </aside>
+      </section>
+      <footer className={styles.bottomBar}><span>✦ PANIM PIXEL STUDIO</span><span>DRAW · ANIMATE · CREATE</span><span>YOUR ART STAYS IN YOUR BROWSER</span></footer>
+    </main>
+  );
+}
