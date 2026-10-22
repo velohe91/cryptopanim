@@ -13,6 +13,13 @@
   border-bottom: 2px solid var(--line);
 }
 .kicker, .room p, .save { margin: 0; }
+.brandBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.brandBlock h1 { margin-bottom: 2px; }
 .kicker {
   color: var(--magenta);
   font-size: 12px;
