@@ -436,7 +436,7 @@ export default function PixelStudioEditor() {
             }
           }
           const opacityValue = Number(sourceLayer.opacity ?? 1);
-          layers.push({ id: id++, name: String(sourceLayer.name || ("Layer " + (layers.length + 1))), visible: sourceLayer.active !== "False" && sourceLayer.visible !== false, opacity: Math.round(Math.max(0, Math.min(1, opacityValue)) * 100), pixels });
+          layers.push({ id: id++, name: String(sourceLayer.name || ("Layer " + (layers.length + 1))), visible: sourceLayer.visible !== false && sourceLayer.options?.visible !== false, opacity: Math.round(Math.max(0, Math.min(1, opacityValue)) * 100), pixels });
         }
         if (!layers.length) layers.push(makeLayer(id++, width, height, "Layer 1"));
         importedFrames.push({ id: fi + 1, duration: Math.max(1, Number(sourceFrame.speed ?? raw.speed ?? 100)), layers });
