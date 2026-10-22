@@ -136,17 +136,24 @@ export function equipItem(equipped: EquippedAvatar, item: AvatarItem): EquippedA
     case "base": {
       // The single visible Skin tab selects the body outline and matching
       // skin-fill layer together, avoiding two tabs for the same tone choice.
-      const matchingSkinId = item.id === "light"
-        ? "skin-light"
-        : item.id === "light-medium"
-          ? "skin-light-medium"
-          : item.id === "medium"
-            ? "skin-medium"
-            : item.id === "medium-deep"
-              ? "skin-medium-deep"
-              : item.id === "deep"
-                ? "skin-deep"
-                : equipped.skinId;
+      const skinByBaseId: Record<string, string> = {
+        light: "skin-light",
+        "light-medium": "skin-light-medium",
+        medium: "skin-medium",
+        "medium-deep": "skin-medium-deep",
+        deep: "skin-deep",
+        "light-hand-up": "skin-light",
+        "light-hand-down": "skin-light",
+        "light-medium-hand-up": "skin-light-medium",
+        "light-medium-hand-down": "skin-light-medium",
+        "medium-hand-up": "skin-medium",
+        "medium-hand-down": "skin-medium",
+        "medium-deep-hand-up": "skin-medium-deep",
+        "medium-deep-hand-down": "skin-medium-deep",
+        "deep-hand-up": "skin-deep",
+        "deep-hand-down": "skin-deep",
+      };
+      const matchingSkinId = skinByBaseId[item.id] ?? equipped.skinId;
       return { ...equipped, baseId: item.id, skinId: matchingSkinId };
     }
     case "skin":
