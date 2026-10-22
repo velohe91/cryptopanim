@@ -50,25 +50,25 @@ export const AVATAR_FRAME = {
 
 /**
  * Paint order from back to front:
- * background → skin/body → eyes → hair → every outfit category → accessories.
+ * background → skin/body → eyes → bottoms → shoes → tops/dresses/costumes
+ * → hair → accessories.
  *
- * Keep all outfit categories on the same band so tops, bottoms, dresses,
- * costumes, and shoes consistently render in front of hair.
+ * Hair must always render above tops and dresses, and tops above bottoms.
  */
 export const LAYER_Z = {
   background: 0,
   skin: 10,
   base: 15,
   eyes: 20,
-  hairBack: 30,
-  hairFront: 30,
   bottom: 40,
-  shoes: 40,
-  top: 40,
-  neck: 50,
-  hood: 50,
-  head: 50,
-  hands: 50,
+  shoes: 45,
+  top: 60,
+  hairBack: 70,
+  hairFront: 70,
+  neck: 80,
+  hood: 80,
+  head: 80,
+  hands: 80,
 } as const;
 
 export type LayerZ = (typeof LAYER_Z)[keyof typeof LAYER_Z];
