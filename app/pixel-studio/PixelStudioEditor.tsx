@@ -437,7 +437,12 @@ export default function PixelStudioEditor() {
             </div>
           </div>
           <div className={styles.canvasScroller}>
-            <div className={styles.canvasChecker} style={{ width: dimensions.width * zoom, height: dimensions.height * zoom }}>
+            <div className={styles.canvasChecker} style={{
+              width: dimensions.width * zoom,
+              height: dimensions.height * zoom,
+              backgroundSize: `${zoom * 2}px ${zoom * 2}px`,
+              backgroundPosition: `0 0, 0 ${zoom}px, ${zoom}px -${zoom}px, -${zoom}px 0`,
+            }}>
               <canvas ref={canvasRef} style={{ width: dimensions.width * zoom, height: dimensions.height * zoom, imageRendering: "pixelated", touchAction: "none", cursor: tool === "eyedropper" ? "copy" : "crosshair" }} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} />
             </div>
           </div>
