@@ -37,7 +37,7 @@ export function InventoryPanel({
   const [hairStyle, setHairStyle] = useState("high-bun");
   const allItems = itemsInCategory(category, accessorySlot);
   const items = category === "hair"
-    ? allItems.filter((item) => item.id === "high-bun" || item.id.startsWith(`${hairStyle}-`))
+    ? allItems.filter((item) => item.id.startsWith(`${hairStyle}-`) || (hairStyle === "high-bun" && item.id === "high-bun"))
     : allItems;
   const selected = selectedId ? getItem(selectedId) : undefined;
 
