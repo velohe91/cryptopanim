@@ -55,6 +55,7 @@ export default function PixelStudioEditor() {
   const [selection, setSelection] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasScrollerRef = useRef<HTMLDivElement>(null);
+  const clipboardRef = useRef<{ width: number; height: number; pixels: string[] } | null>(null);
   const drawingRef = useRef(false);
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const previewRef = useRef<string[] | null>(null);
@@ -411,8 +412,77 @@ export default function PixelStudioEditor() {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") { event.preventDefault(); undo(); return; }
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") { event.preventDefault(); redo(); return; }
+      if (event.key === "Escape") {
+        if (selection || drawingRef.current) {
+          event.preventDefault();
+          drawingRef.current = false;
+          startRef.current = null;
+          previewRef.current = null;
+          setSelection(null);
+          setStatus("Selection cancelled");
+        }
+        return;
+      }
+      const command = event.ctrlKey || event.metaKey;
+      if (command && event.key.toLowerCase() === "z") { event.preventDefault(); undo(); return; }
+      if (command && event.key.toLowerCase() === "y") { event.preventDefault(); redo(); return; }
+      if (command && ["c", "x", "v"].includes(event.key.toLowerCase())) {
+        if (event.key.toLowerCase() === "v") {
+          const clipboard = clipboardRef.current;
+          if (!clipboard) return;
+          event.preventDefault();
+          const originX = selection?.x ?? 0;
+          const originY = selection?.y ?? 0;
+          const pixels = [...activeLayer.pixels];
+          let copiedWidth = 0;
+          let copiedHeight = 0;
+          for (let y = 0; y < clipboard.height; y++) {
+            for (let x = 0; x < clipboard.width; x++) {
+              const targetX = originX + x;
+              const targetY = originY + y;
+              if (targetX < 0 || targetY < 0 || targetX >= dimensions.width || targetY >= dimensions.height) continue;
+              pixels[pixelIndex(targetX, targetY, dimensions.width)] = clipboard.pixels[y * clipboard.width + x];
+              copiedWidth = Math.max(copiedWidth, x + 1);
+              copiedHeight = Math.max(copiedHeight, y + 1);
+            }
+          }
+          if (copiedWidth && copiedHeight) {
+            remember();
+            updateActiveLayer(pixels);
+            setSelection({ x: originX, y: originY, w: Math.min(copiedWidth, dimensions.width - originX), h: Math.min(copiedHeight, dimensions.height - originY) });
+            setStatus("Selection pasted");
+          }
+          return;
+        }
+        if (!selection) return;
+        event.preventDefault();
+        const copiedPixels: string[] = [];
+        for (let y = 0; y < selection.h; y++) {
+          for (let x = 0; x < selection.w; x++) {
+            const sx = selection.x + x;
+            const sy = selection.y + y;
+            copiedPixels.push(sx >= 0 && sy >= 0 && sx < dimensions.width && sy < dimensions.height ? activeLayer.pixels[pixelIndex(sx, sy, dimensions.width)] : TRANSPARENT);
+          }
+        }
+        clipboardRef.current = { width: selection.w, height: selection.h, pixels: copiedPixels };
+        if (event.key.toLowerCase() === "x") {
+          remember();
+          const pixels = [...activeLayer.pixels];
+          for (let y = selection.y; y < selection.y + selection.h; y++) for (let x = selection.x; x < selection.x + selection.w; x++) if (x >= 0 && y >= 0 && x < dimensions.width && y < dimensions.height) pixels[pixelIndex(x, y, dimensions.width)] = TRANSPARENT;
+          updateActiveLayer(pixels);
+          setStatus("Selection cut");
+        } else setStatus("Selection copied");
+        return;
+      }
+      if ((event.key === "Delete" || event.key === "Backspace") && selection) {
+        event.preventDefault();
+        remember();
+        const pixels = [...activeLayer.pixels];
+        for (let y = selection.y; y < selection.y + selection.h; y++) for (let x = selection.x; x < selection.x + selection.w; x++) if (x >= 0 && y >= 0 && x < dimensions.width && y < dimensions.height) pixels[pixelIndex(x, y, dimensions.width)] = TRANSPARENT;
+        updateActiveLayer(pixels);
+        setStatus("Selection cleared");
+        return;
+      }
       const keyTools: Record<string, Tool> = { b: "pencil", e: "eraser", g: "fill", i: "eyedropper", l: "line", u: "rect", o: "ellipse", m: "select", t: "text" };
       if (keyTools[event.key.toLowerCase()]) setTool(keyTools[event.key.toLowerCase()]);
       if (event.key === "[") setBrushSize((size) => Math.max(1, size - 1));
