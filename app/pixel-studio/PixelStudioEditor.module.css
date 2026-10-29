@@ -69,6 +69,10 @@
 .swapColors, .defaultColors { position: absolute; z-index: 3; display: grid; place-items: center; width: 22px; height: 20px; padding: 0; border: 1px solid #34394f; background: #171a27; color: #e8e2ff; font-size: 14px; cursor: pointer; }
 .swapColors { right: -1px; top: -4px; }
 .defaultColors { left: -2px; bottom: -1px; }
+.hexColorFields { display: grid; gap: 8px; margin: 10px 0 4px; }
+.hexColorFields label { display: grid; gap: 5px; color: #7f859c; font-size: 9px; letter-spacing: .08em; }
+.hexColorFields input { width: 100%; min-width: 0; padding: 8px; border: 1px solid #34394f; background: #171a27; color: #e9e4fb; font: inherit; font-size: 11px; letter-spacing: .04em; }
+.hexColorFields input:focus { outline: 1px solid #a78bfa; border-color: #a78bfa; }
 .colorControls .currentColor { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 10px 0; }
 .colorControls .currentColor div { min-width: 0; display: grid; gap: 4px; }
 .colorControls .currentColor strong { font-size: 10px; }
