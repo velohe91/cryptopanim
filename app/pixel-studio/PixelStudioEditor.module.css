@@ -65,7 +65,8 @@
 .primaryColor, .secondaryColor { position: absolute; display: block; width: 46px; height: 46px; padding: 3px; border: 1px solid #e8e2ff; background: #171a27; border-radius: 2px; }
 .primaryColor { top: 0; left: 0; z-index: 2; }
 .secondaryColor { top: 16px; left: 23px; z-index: 1; }
-.primaryColor input, .secondaryColor input { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.primaryColor input, .secondaryColor input { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; opacity: 0; position: absolute; inset: 0; }
+.primaryColor, .secondaryColor { position: absolute; overflow: hidden; cursor: pointer; }
 .swapColors, .defaultColors { position: absolute; z-index: 3; display: grid; place-items: center; width: 22px; height: 20px; padding: 0; border: 1px solid #34394f; background: #171a27; color: #e8e2ff; font-size: 14px; cursor: pointer; }
 .swapColors { right: -1px; top: -4px; }
 .defaultColors { left: -2px; bottom: -1px; }
