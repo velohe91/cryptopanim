@@ -47,18 +47,28 @@ function hsvToHex(h: number, s: number, v: number) {
   const [r, g, b] = h < 60 ? [c,x,0] : h < 120 ? [x,c,0] : h < 180 ? [0,c,x] : h < 240 ? [0,x,c] : h < 300 ? [x,0,c] : [c,0,x];
   return "#" + [r,g,b].map(n => Math.round((n+m)*255).toString(16).padStart(2,"0")).join("");
 }
-function HexColorPicker({ value, onChange, label }: { value: string; onChange: (value: string) => void; label: string }) {
-  const hsv = hexToHsv(value);
-  const areaRef = useRef<HTMLDivElement>(null);
+function HexColorPicker({ value, onChange, label, swatchClass }: { value: string; onChange: (value: string) => void; label: string; swatchClass: string }) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const hsv = hexToHsv(/^#[0-9a-fA-F]{6}$/.test(draft) ? draft : value);
   const choose = (event: React.PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const s = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
     const v = Math.max(0, Math.min(100, (1 - (event.clientY - rect.top) / rect.height) * 100));
-    onChange(hsvToHex(hsv.h, s, v));
+    setDraft(hsvToHex(hsv.h, s, v));
   };
-  return <div className={styles.customPicker}>
-    <div ref={areaRef} className={styles.saturationArea} style={{ backgroundColor: `hsl(${hsv.h} 100% 50%)` }} onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); choose(e); }} onPointerMove={(e) => { if (e.buttons === 1) choose(e); }}><span style={{ left: `${hsv.s}%`, top: `${100-hsv.v}%` }} /></div>
-    <input className={styles.hueRainbow} aria-label={label + " hue"} type="range" min="0" max="359" value={hsv.h} onChange={(e) => onChange(hsvToHex(Number(e.target.value), hsv.s, hsv.v))} />
+  const selectColor = () => {
+    if (/^#[0-9a-fA-F]{6}$/.test(draft)) onChange(draft.toLowerCase());
+    setOpen(false);
+  };
+  return <div className={styles.pickerPopoverWrap}>
+    <button type="button" className={swatchClass} style={{ background: value }} aria-label={label + " color"} title={label + " · Click to choose HEX color"} onClick={() => { setDraft(value); setOpen((current) => !current); }} />
+    {open && <div className={styles.pickerPopover} role="dialog" aria-label={label + " color picker"}>
+      <div className={styles.saturationArea} style={{ backgroundColor: `hsl(${hsv.h} 100% 50%)` }} onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); choose(e); }} onPointerMove={(e) => { if (e.buttons === 1) choose(e); }}><span style={{ left: `${hsv.s}%`, top: `${100-hsv.v}%` }} /></div>
+      <input className={styles.hueRainbow} aria-label={label + " hue"} type="range" min="0" max="359" value={hsv.h} onChange={(e) => setDraft(hsvToHex(Number(e.target.value), hsv.s, hsv.v))} />
+      <label className={styles.pickerHexLabel}>HEX<input aria-label={label + " HEX"} value={draft.toUpperCase()} maxLength={7} spellCheck={false} onChange={(e) => { const next = e.target.value.startsWith("#") ? e.target.value : "#" + e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(next)) setDraft(next); }} onBlur={() => { if (!/^#[0-9a-fA-F]{6}$/.test(draft)) setDraft(value); }} /></label>
+      <button type="button" className={styles.pickerSelectButton} onClick={selectColor}>Select Color</button>
+    </div>}
   </div>;
 }
 function LayerThumbnail({ pixels, width, height }: { pixels: string[]; width: number; height: number }) {
@@ -650,7 +660,7 @@ export default function PixelStudioEditor() {
         <aside className={styles.properties}>
           <section className={styles.panel}>
             <div className={styles.panelHeading}><div><span className={styles.panelIcon}>◈</span><strong>COLOR LAB</strong></div><button type="button" onClick={() => setPalette((p) => [...p, color])} title="Add current color to palette">＋</button></div>
-            <div className={styles.colorControls}><div className={styles.colorSwatches} aria-label="Primary and secondary colors"><span className={styles.primaryColor} title={`Primary color ${color}`} style={{ background: color }} /><span className={styles.secondaryColor} title={`Secondary color ${secondaryColor}`} style={{ background: secondaryColor }} /><button type="button" className={styles.swapColors} onClick={() => { setColor(secondaryColor); setSecondaryColor(color); }} title="Swap primary and secondary colors (X)">⇄</button><button type="button" className={styles.defaultColors} onClick={() => { setColor("#000000"); setSecondaryColor("#ffffff"); }} title="Reset colors to black and white">↖</button></div><div className={styles.pickerPair}><div><small>PRIMARY COLOR</small><HexColorPicker value={color} onChange={setColor} label="Primary" /></div><div><small>SECONDARY COLOR</small><HexColorPicker value={secondaryColor} onChange={setSecondaryColor} label="Secondary" /></div></div><div className={styles.hexColorFields}><label>PRIMARY HEX<input aria-label="Primary hex color" value={color.toUpperCase()} onChange={(e) => { const value = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(value)) setColor(value); }} onBlur={() => { if (!/^#[0-9a-fA-F]{6}$/.test(color)) setColor("#000000"); }} maxLength={7} spellCheck={false} /></label><label>SECONDARY HEX<input aria-label="Secondary hex color" value={secondaryColor.toUpperCase()} onChange={(e) => { const value = e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(value)) setSecondaryColor(value); }} onBlur={() => { if (!/^#[0-9a-fA-F]{6}$/.test(secondaryColor)) setSecondaryColor("#ffffff"); }} maxLength={7} spellCheck={false} /></label></div></div>
+            <div className={styles.colorControls}><div className={styles.colorSwatches} aria-label="Primary and secondary colors"><HexColorPicker value={color} onChange={setColor} label="Primary" swatchClass={styles.primaryColor} /><HexColorPicker value={secondaryColor} onChange={setSecondaryColor} label="Secondary" swatchClass={styles.secondaryColor} /><button type="button" className={styles.swapColors} onClick={() => { setColor(secondaryColor); setSecondaryColor(color); }} title="Swap primary and secondary colors (X)">⇄</button><button type="button" className={styles.defaultColors} onClick={() => { setColor("#000000"); setSecondaryColor("#ffffff"); }} title="Reset colors to black and white">↖</button></div></div>
             <div className={styles.swatches}>{palette.map((swatch, i) => <button type="button" key={swatch + i} title={`${swatch} · Left-click to select · Right-click to remove`} style={{ background: swatch }} className={color === swatch ? styles.selectedSwatch : ""} onClick={() => setColor(swatch)} onContextMenu={(event) => { event.preventDefault(); setPalette((current) => current.filter((_, index) => index !== i)); setStatus(`Removed color ${swatch.toUpperCase()} from palette`); }} />)}</div>
             
             <button type="button" className={styles.fullButton} onClick={() => setPalette(DEFAULT_PALETTE)}>Reset default palette</button>
