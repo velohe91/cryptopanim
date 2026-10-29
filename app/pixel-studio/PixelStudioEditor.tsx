@@ -11,7 +11,7 @@ const TRANSPARENT = "";
 
 const TOOL_LIST: { id: Tool; label: string; icon: string; group: string }[] = [
   { id: "pencil", label: "Pencil (P)", icon: "✏️", group: "DRAW" },
-  { id: "eraser", label: "Eraser (E)", icon: "🩷", group: "DRAW" },
+  { id: "eraser", label: "Eraser (E)", icon: "🧽", group: "DRAW" },
   { id: "fill", label: "Bucket (B)", icon: "🪣", group: "DRAW" },
   { id: "eyedropper", label: "Color Picker (V)", icon: "💧", group: "DRAW" },
   { id: "line", label: "Line (L)", icon: "📏", group: "SHAPES" },
