@@ -617,7 +617,7 @@ export default function PixelStudioEditor() {
           <section className={styles.panel}>
             <div className={styles.panelHeading}><div><span className={styles.panelIcon}>◈</span><strong>COLOR LAB</strong></div><button type="button" onClick={() => setPalette((p) => [...p, color])} title="Add current color to palette">＋</button></div>
             <div className={styles.currentColor}><input aria-label="Current color" type="color" value={color} onChange={(e) => setColor(e.target.value)} /><div><small>ACTIVE COLOR</small><strong>{color.toUpperCase()}</strong></div></div>
-            <div className={styles.swatches}>{palette.map((swatch, i) => <button type="button" key={swatch + i} title={swatch} style={{ background: swatch }} className={color === swatch ? styles.selectedSwatch : ""} onClick={() => setColor(swatch)} />)}</div>
+            <div className={styles.swatches}>{palette.map((swatch, i) => <button type="button" key={swatch + i} title={`${swatch} · Left-click to select · Right-click to remove`} style={{ background: swatch }} className={color === swatch ? styles.selectedSwatch : ""} onClick={() => setColor(swatch)} onContextMenu={(event) => { event.preventDefault(); setPalette((current) => current.filter((_, index) => index !== i)); setStatus(`Removed color ${swatch.toUpperCase()} from palette`); }} />)}</div>
             <label className={styles.paletteInput}>HEX COLOR <input value={color} onChange={(e) => /^#[0-9a-fA-F]{0,6}$/.test(e.target.value) && setColor(e.target.value)} maxLength={7} /></label>
             <button type="button" className={styles.fullButton} onClick={() => setPalette(DEFAULT_PALETTE)}>Reset default palette</button>
           </section>
