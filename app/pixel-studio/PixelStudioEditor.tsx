@@ -80,6 +80,7 @@ export default function PixelStudioEditor() {
   const canvasScrollerRef = useRef<HTMLDivElement>(null);
   const clipboardRef = useRef<{ width: number; height: number; pixels: string[] } | null>(null);
   const drawingRef = useRef(false);
+  const eraseGestureRef = useRef(false);
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const previewRef = useRef<string[] | null>(null);
   const historyRef = useRef<Snapshot[]>([]);
@@ -237,16 +238,16 @@ export default function PixelStudioEditor() {
     }
   };
 
-  const floodFill = (pixels: string[], x: number, y: number) => {
+  const floodFill = (pixels: string[], x: number, y: number, replacement = color) => {
     const start = pixelIndex(x, y, dimensions.width);
     const target = pixels[start];
-    if (target === color) return pixels;
+    if (target === replacement) return pixels;
     const result = [...pixels];
     const stack = [start];
     while (stack.length) {
       const i = stack.pop()!;
       if (result[i] !== target) continue;
-      result[i] = color;
+      result[i] = replacement;
       const px = i % dimensions.width; const py = Math.floor(i / dimensions.width);
       if (px > 0) stack.push(i - 1);
       if (px < dimensions.width - 1) stack.push(i + 1);
@@ -257,6 +258,9 @@ export default function PixelStudioEditor() {
   };
 
   const pointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (event.button === 2) event.preventDefault();
+    if (event.button !== 0 && event.button !== 2) return;
+    eraseGestureRef.current = event.button === 2;
     if (playing) setPlaying(false);
     event.currentTarget.setPointerCapture(event.pointerId);
     const point = pointFromEvent(event);
@@ -282,14 +286,14 @@ export default function PixelStudioEditor() {
       }
       return;
     }
-    if (tool === "fill") { remember(); updateActiveLayer(floodFill([...activeLayer.pixels], point.x, point.y)); setStatus("Area filled"); return; }
+    if (tool === "fill") { remember(); updateActiveLayer(floodFill([...activeLayer.pixels], point.x, point.y, eraseGestureRef.current ? TRANSPARENT : color)); setStatus(eraseGestureRef.current ? "Area erased" : "Area filled"); return; }
     if (tool === "select") { startRef.current = point; drawingRef.current = true; setSelection({ x: point.x, y: point.y, w: 1, h: 1 }); return; }
     remember();
     drawingRef.current = true;
     startRef.current = point;
     if (tool === "pencil" || tool === "eraser") {
       const pixels = [...activeLayer.pixels];
-      stamp(pixels, point.x, point.y, tool === "eraser" ? TRANSPARENT : color);
+      stamp(pixels, point.x, point.y, tool === "eraser" || eraseGestureRef.current ? TRANSPARENT : color);
       updateActiveLayer(pixels);
     } else {
       previewRef.current = [...activeLayer.pixels];
@@ -313,7 +317,7 @@ export default function PixelStudioEditor() {
     }
     const start = startRef.current;
     const pixels = [...activeLayer.pixels];
-    const value = tool === "eraser" ? TRANSPARENT : color;
+    const value = tool === "eraser" || eraseGestureRef.current ? TRANSPARENT : color;
     if (tool === "line") drawLine(pixels, start.x, start.y, point.x, point.y, value);
     if (tool === "rect") {
       for (let x = Math.min(start.x, point.x); x <= Math.max(start.x, point.x); x++) { stamp(pixels, x, start.y, value); stamp(pixels, x, point.y, value); }
@@ -340,6 +344,7 @@ export default function PixelStudioEditor() {
     drawingRef.current = false;
     startRef.current = null;
     previewRef.current = null;
+    eraseGestureRef.current = false;
   };
 
   const undo = () => {
@@ -603,7 +608,7 @@ export default function PixelStudioEditor() {
               backgroundSize: `${zoom * 2}px ${zoom * 2}px`,
               backgroundPosition: `0 0, 0 ${zoom}px, ${zoom}px -${zoom}px, -${zoom}px 0`,
             }}>
-              <canvas ref={canvasRef} style={{ width: dimensions.width * zoom, height: dimensions.height * zoom, imageRendering: "pixelated", touchAction: "none" }} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} />
+              <canvas ref={canvasRef} style={{ width: dimensions.width * zoom, height: dimensions.height * zoom, imageRendering: "pixelated", touchAction: "none" }} onContextMenu={(event) => event.preventDefault()} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} />
             </div>
           </div>
           <footer className={styles.canvasFooter}><span>{status}</span><span>{tool.toUpperCase()} · {color.toUpperCase()}</span><span>PIXEL PERFECT MODE</span></footer>
