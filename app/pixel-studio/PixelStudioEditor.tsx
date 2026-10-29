@@ -66,6 +66,7 @@ export default function PixelStudioEditor() {
   const [nextId, setNextId] = useState(2);
   const [tool, setTool] = useState<Tool>("pencil");
   const [color, setColor] = useState("#000000");
+  const [secondaryColor, setSecondaryColor] = useState("#ffffff");
   const [palette, setPalette] = useState(DEFAULT_PALETTE);
   const [brushSize, setBrushSize] = useState(1);
   const [zoom, setZoom] = useState(12);
@@ -559,6 +560,7 @@ export default function PixelStudioEditor() {
         setStatus("Selection cleared");
         return;
       }
+      if (!command && event.key.toLowerCase() === "x") { event.preventDefault(); setColor((primary) => { setSecondaryColor(primary); return secondaryColor; }); return; }
       const keyTools: Record<string, Tool> = { p: "pencil", b: "fill", e: "eraser", v: "eyedropper", l: "line", r: "rect", c: "ellipse", s: "select", t: "text" };
       if (keyTools[event.key.toLowerCase()]) setTool(keyTools[event.key.toLowerCase()]);
       if (event.key === "[") setBrushSize((size) => Math.max(1, size - 1));
@@ -621,7 +623,7 @@ export default function PixelStudioEditor() {
         <aside className={styles.properties}>
           <section className={styles.panel}>
             <div className={styles.panelHeading}><div><span className={styles.panelIcon}>◈</span><strong>COLOR LAB</strong></div><button type="button" onClick={() => setPalette((p) => [...p, color])} title="Add current color to palette">＋</button></div>
-            <div className={styles.currentColor}><input aria-label="Current color" type="color" value={color} onChange={(e) => setColor(e.target.value)} /><div><small>ACTIVE COLOR</small><strong>{color.toUpperCase()}</strong></div></div>
+            <div className={styles.colorControls}><div className={styles.colorSwatches} aria-label="Primary and secondary colors"><label className={styles.primaryColor} title={`Primary color ${color}`}><input aria-label="Primary color" type="color" value={color} onChange={(e) => setColor(e.target.value)} /></label><label className={styles.secondaryColor} title={`Secondary color ${secondaryColor}`}><input aria-label="Secondary color" type="color" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} /></label><button type="button" className={styles.swapColors} onClick={() => { setColor(secondaryColor); setSecondaryColor(color); }} title="Swap primary and secondary colors (X)">⇄</button><button type="button" className={styles.defaultColors} onClick={() => { setColor("#000000"); setSecondaryColor("#ffffff"); }} title="Reset colors to black and white">↖</button></div><div className={styles.currentColor}><div><small>PRIMARY</small><strong>{color.toUpperCase()}</strong></div><div><small>SECONDARY</small><strong>{secondaryColor.toUpperCase()}</strong></div></div></div>
             <div className={styles.swatches}>{palette.map((swatch, i) => <button type="button" key={swatch + i} title={`${swatch} · Left-click to select · Right-click to remove`} style={{ background: swatch }} className={color === swatch ? styles.selectedSwatch : ""} onClick={() => setColor(swatch)} onContextMenu={(event) => { event.preventDefault(); setPalette((current) => current.filter((_, index) => index !== i)); setStatus(`Removed color ${swatch.toUpperCase()} from palette`); }} />)}</div>
             <label className={styles.paletteInput}>HEX COLOR <input value={color} onChange={(e) => /^#[0-9a-fA-F]{0,6}$/.test(e.target.value) && setColor(e.target.value)} maxLength={7} /></label>
             <button type="button" className={styles.fullButton} onClick={() => setPalette(DEFAULT_PALETTE)}>Reset default palette</button>
