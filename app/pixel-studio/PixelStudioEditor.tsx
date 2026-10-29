@@ -65,7 +65,7 @@ export default function PixelStudioEditor() {
   const [activeLayerId, setActiveLayerId] = useState(1);
   const [nextId, setNextId] = useState(2);
   const [tool, setTool] = useState<Tool>("pencil");
-  const [color, setColor] = useState("#c4b5fd");
+  const [color, setColor] = useState("#000000");
   const [palette, setPalette] = useState(DEFAULT_PALETTE);
   const [brushSize, setBrushSize] = useState(1);
   const [zoom, setZoom] = useState(12);
