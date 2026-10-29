@@ -34,6 +34,27 @@ function cloneFrames(frames: Frame[]): Frame[] {
 }
 function pixelIndex(x: number, y: number, width: number) { return y * width + x; }
 
+function LayerThumbnail({ pixels, width, height }: { pixels: string[]; width: number; height: number }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    canvas.width = width; canvas.height = height;
+    const image = ctx.createImageData(width, height);
+    pixels.forEach((value, i) => {
+      if (!value) return;
+      const hex = Number.parseInt(value.slice(1), 16);
+      image.data[i * 4] = (hex >> 16) & 255;
+      image.data[i * 4 + 1] = (hex >> 8) & 255;
+      image.data[i * 4 + 2] = hex & 255;
+      image.data[i * 4 + 3] = 255;
+    });
+    ctx.putImageData(image, 0, 0);
+  }, [pixels, width, height]);
+  return <canvas ref={ref} className={styles.layerThumbnail} width={width} height={height} aria-hidden="true" />;
+}
+
 export default function PixelStudioEditor() {
   const [dimensions, setDimensions] = useState({ width: 32, height: 32 });
   const [documentName, setDocumentName] = useState("Untitled");
@@ -604,7 +625,7 @@ export default function PixelStudioEditor() {
             <div className={styles.panelHeading}><div><span className={styles.panelIcon}>▧</span><strong>LAYERS</strong></div><button type="button" onClick={addLayer}>＋ Add</button></div>
             <div className={styles.layerList}>{[...activeFrame.layers].reverse().map((layer) => <div key={layer.id} className={layer.id === activeLayerId ? styles.activeLayer : styles.layerRow}>
               <button type="button" className={styles.visibility} onClick={() => updateLayer(layer.id, { visible: !layer.visible })}>{layer.visible ? "◉" : "○"}</button>
-              <button type="button" className={styles.layerName} onClick={() => setActiveLayerId(layer.id)} onDoubleClick={() => { const name = window.prompt("Layer name", layer.name); if (name?.trim()) updateLayer(layer.id, { name: name.trim() }); }} title="Click to select · double-click to rename">{layer.name}</button>
+              <LayerThumbnail pixels={layer.pixels} width={dimensions.width} height={dimensions.height} /><button type="button" className={styles.layerName} onClick={() => setActiveLayerId(layer.id)} onDoubleClick={() => { const name = window.prompt("Layer name", layer.name); if (name?.trim()) updateLayer(layer.id, { name: name.trim() }); }} title="Click to select · double-click to rename">{layer.name}</button>
               <button type="button" className={styles.layerMove} onClick={() => moveLayer(layer.id, 1)} title="Move layer up">↑</button><button type="button" className={styles.layerMove} onClick={() => moveLayer(layer.id, -1)} title="Move layer down">↓</button>
               <button type="button" className={styles.layerMove} onClick={() => deleteLayer(layer.id)} title="Delete layer" disabled={activeFrame.layers.length <= 1}>×</button>
               <input aria-label={layer.name + " opacity"} type="range" min="0" max="100" value={layer.opacity} onChange={(e) => updateLayer(layer.id, { opacity: Number(e.target.value) })} />
