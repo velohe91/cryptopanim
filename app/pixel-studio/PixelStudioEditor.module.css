@@ -17,11 +17,11 @@
 .topActions .export { color: #f4efff; border-color: #7f65ca; background: #38295e; }
 .workspace { display: grid; grid-template-columns: 168px minmax(360px, 1fr) 270px; min-height: calc(100vh - 102px); }
 .toolRail { padding: 15px 12px; border-right: 1px solid var(--stroke); background: #0e111a; }
-.toolGroup { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-bottom: 18px; }
+.toolGroup { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin-bottom: 18px; }
 .groupLabel { grid-column: 1 / -1; color: #737b98; font-size: 9px; letter-spacing: .14em; margin: 3px 0 6px; }
-.toolButton, .activeTool { min-height: 53px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: 1px solid #292f43; background: #151927; }
-.toolButton > span, .activeTool > span { font-size: 20px; line-height: 1; }
-.toolButton small, .activeTool small { font-size: 8px; color: #9ba1b8; }
+.toolButton, .activeTool { aspect-ratio: 1; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: 1px solid #292f43; background: #151927; border-radius: 3px; }
+.toolButton > span, .activeTool > span { font-size: 25px; line-height: 1; filter: saturate(1.15); }
+.toolButton small, .activeTool small { font-size: 7px; color: #9ba1b8; line-height: 1; }
 .activeTool { color: #eee8ff; border-color: var(--purple); background: #29213e; box-shadow: inset 0 0 0 1px #4e3c76; }
 .activeTool small { color: #d7caff; }
 .toolOptions { display: grid; gap: 13px; border-top: 1px solid var(--stroke); padding-top: 14px; }
