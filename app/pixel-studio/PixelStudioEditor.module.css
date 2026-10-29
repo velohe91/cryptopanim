@@ -60,6 +60,18 @@
 .duration input { width: 75px; padding: 5px; border: 1px solid #34394f; color: #e7e3f7; background: #171a27; }
 .properties { padding: 13px; border-left: 1px solid var(--stroke); background: #0e111a; }
 .panel { padding: 13px 0 16px; border-bottom: 1px solid var(--stroke); }
+.colorControls { margin: 12px 0; }
+.colorSwatches { position: relative; width: 78px; height: 66px; margin: 0 auto 10px 2px; }
+.primaryColor, .secondaryColor { position: absolute; display: block; width: 46px; height: 46px; padding: 3px; border: 1px solid #e8e2ff; background: #171a27; border-radius: 2px; }
+.primaryColor { top: 0; left: 0; z-index: 2; }
+.secondaryColor { top: 16px; left: 23px; z-index: 1; }
+.primaryColor input, .secondaryColor input { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.swapColors, .defaultColors { position: absolute; z-index: 3; display: grid; place-items: center; width: 22px; height: 20px; padding: 0; border: 1px solid #34394f; background: #171a27; color: #e8e2ff; font-size: 14px; cursor: pointer; }
+.swapColors { right: -1px; top: -4px; }
+.defaultColors { left: -2px; bottom: -1px; }
+.colorControls .currentColor { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 10px 0; }
+.colorControls .currentColor div { min-width: 0; display: grid; gap: 4px; }
+.colorControls .currentColor strong { font-size: 10px; }
 .currentColor { display: flex; align-items: center; gap: 11px; margin: 14px 0; }
 .currentColor input { width: 46px; height: 43px; padding: 2px; border: 1px solid #424861; background: #171a27; }
 .currentColor div { display: grid; gap: 5px; }
