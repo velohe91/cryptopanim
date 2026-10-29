@@ -70,6 +70,15 @@
 .swapColors, .defaultColors { position: absolute; z-index: 3; display: grid; place-items: center; width: 22px; height: 20px; padding: 0; border: 1px solid #34394f; background: #171a27; color: #e8e2ff; font-size: 14px; cursor: pointer; }
 .swapColors { right: -1px; top: -4px; }
 .defaultColors { left: -2px; bottom: -1px; }
+.pickerPair { display: grid; gap: 10px; margin: 10px 0; }
+.pickerPair > div { display: grid; gap: 5px; }
+.pickerPair small { color: #7f859c; font-size: 9px; letter-spacing: .08em; }
+.customPicker { display: grid; gap: 7px; }
+.saturationArea { position: relative; height: 82px; overflow: hidden; touch-action: none; cursor: crosshair; background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent); border: 1px solid #34394f; }
+.saturationArea span { position: absolute; width: 9px; height: 9px; transform: translate(-50%, -50%); border: 1px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px #111; pointer-events: none; }
+.hueRainbow { appearance: none; width: 100%; height: 12px; margin: 0; border: 1px solid #34394f; background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); cursor: pointer; }
+.hueRainbow::-webkit-slider-thumb { appearance: none; width: 9px; height: 16px; border: 1px solid #fff; background: #171a27; }
+.hueRainbow::-moz-range-thumb { width: 7px; height: 14px; border: 1px solid #fff; border-radius: 0; background: #171a27; }
 .hexColorFields { display: grid; gap: 8px; margin: 10px 0 4px; }
 .hexColorFields label { display: grid; gap: 5px; color: #7f859c; font-size: 9px; letter-spacing: .08em; }
 .hexColorFields input { width: 100%; min-width: 0; padding: 8px; border: 1px solid #34394f; background: #171a27; color: #e9e4fb; font: inherit; font-size: 11px; letter-spacing: .04em; }
