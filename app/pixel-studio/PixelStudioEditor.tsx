@@ -50,6 +50,8 @@ function hsvToHex(h: number, s: number, v: number) {
 function HexColorPicker({ value, onChange, label, swatchClass }: { value: string; onChange: (value: string) => void; label: string; swatchClass: string }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(value);
+  const [position, setPosition] = useState({ x: 120, y: 100 });
+  const dragRef = useRef<{ pointerX: number; pointerY: number; x: number; y: number } | null>(null);
   const hsv = hexToHsv(/^#[0-9a-fA-F]{6}$/.test(draft) ? draft : value);
   const choose = (event: React.PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -57,13 +59,34 @@ function HexColorPicker({ value, onChange, label, swatchClass }: { value: string
     const v = Math.max(0, Math.min(100, (1 - (event.clientY - rect.top) / rect.height) * 100));
     setDraft(hsvToHex(hsv.h, s, v));
   };
+  const openPicker = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const width = Math.min(320, window.innerWidth - 16);
+    const height = 270;
+    setPosition({ x: Math.max(8, Math.min(rect.right + 8, window.innerWidth - width - 8)), y: Math.max(8, Math.min(rect.top, window.innerHeight - height - 8)) });
+    setDraft(value);
+    setOpen((current) => !current);
+  };
+  const dragStart = (event: React.PointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("button")) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = { pointerX: event.clientX, pointerY: event.clientY, x: position.x, y: position.y };
+  };
+  const dragMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const start = dragRef.current;
+    if (!start) return;
+    const width = Math.min(320, window.innerWidth - 16), height = 270;
+    setPosition({ x: Math.max(8, Math.min(window.innerWidth - width - 8, start.x + event.clientX - start.pointerX)), y: Math.max(8, Math.min(window.innerHeight - height - 8, start.y + event.clientY - start.pointerY)) });
+  };
   const selectColor = () => {
     if (/^#[0-9a-fA-F]{6}$/.test(draft)) onChange(draft.toLowerCase());
     setOpen(false);
   };
   return <div className={styles.pickerPopoverWrap}>
-    <button type="button" className={swatchClass} style={{ background: value }} aria-label={label + " color"} title={label + " · Click to choose HEX color"} onClick={() => { setDraft(value); setOpen((current) => !current); }} />
-    {open && <div className={styles.pickerPopover} role="dialog" aria-label={label + " color picker"}>
+    <button type="button" className={swatchClass} style={{ background: value }} aria-label={label + " color"} title={label + " · Click to choose HEX color"} onClick={openPicker} />
+    {open && <div className={styles.pickerPopover} style={{ position: "fixed", left: position.x, top: position.y }} role="dialog" aria-label={label + " color picker"}>
+      <div className={styles.pickerDragBar} onPointerDown={dragStart} onPointerMove={dragMove} onPointerUp={() => { dragRef.current = null; }} onPointerCancel={() => { dragRef.current = null; }}><span>{label.toUpperCase()} COLOR</span><span className={styles.dragHint}>DRAG TO MOVE</span><button type="button" aria-label="Close color picker" onClick={() => setOpen(false)}>×</button></div>
       <div className={styles.saturationArea} style={{ backgroundColor: `hsl(${hsv.h} 100% 50%)` }} onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); choose(e); }} onPointerMove={(e) => { if (e.buttons === 1) choose(e); }}><span style={{ left: `${hsv.s}%`, top: `${100-hsv.v}%` }} /></div>
       <input className={styles.hueRainbow} aria-label={label + " hue"} type="range" min="0" max="359" value={hsv.h} onChange={(e) => setDraft(hsvToHex(Number(e.target.value), hsv.s, hsv.v))} />
       <label className={styles.pickerHexLabel}>HEX<input aria-label={label + " HEX"} value={draft.toUpperCase()} maxLength={7} spellCheck={false} onChange={(e) => { const next = e.target.value.startsWith("#") ? e.target.value : "#" + e.target.value; if (/^#[0-9a-fA-F]{0,6}$/.test(next)) setDraft(next); }} onBlur={() => { if (!/^#[0-9a-fA-F]{6}$/.test(draft)) setDraft(value); }} /></label>
