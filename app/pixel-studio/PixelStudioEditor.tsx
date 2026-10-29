@@ -43,7 +43,6 @@ function hexToHsv(hex: string) {
   return { h, s: max ? d / max * 100 : 0, v: max * 100 };
 }
 function hsvToHex(h: number, s: number, v: number) {
-  const f = (n: number) => { const k = (n + h / 60) % 6; return Math.round(255 * (v / 100 - (v / 100) * (s / 100) * Math.max(0, Math.min(k, 4 - k, 1))).toString().padStart(0, "0"); };
   const c = (v / 100) * (s / 100), x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v / 100 - c;
   const [r, g, b] = h < 60 ? [c,x,0] : h < 120 ? [x,c,0] : h < 180 ? [0,c,x] : h < 240 ? [0,x,c] : h < 300 ? [x,0,c] : [c,0,x];
   return "#" + [r,g,b].map(n => Math.round((n+m)*255).toString(16).padStart(2,"0")).join("");
