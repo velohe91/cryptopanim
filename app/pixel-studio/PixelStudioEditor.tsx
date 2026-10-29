@@ -10,15 +10,15 @@ type Snapshot = { frames: Frame[]; frameIndex: number; layerId: number };
 const TRANSPARENT = "";
 
 const TOOL_LIST: { id: Tool; label: string; icon: string; group: string }[] = [
-  { id: "pencil", label: "Pencil (P)", icon: "✎", group: "DRAW" },
-  { id: "eraser", label: "Eraser (E)", icon: "▱", group: "DRAW" },
-  { id: "fill", label: "Bucket (B)", icon: "▨", group: "DRAW" },
-  { id: "eyedropper", label: "Color Picker (V)", icon: "⌕", group: "DRAW" },
-  { id: "line", label: "Line (L)", icon: "／", group: "SHAPES" },
-  { id: "rect", label: "Rectangle (R)", icon: "□", group: "SHAPES" },
-  { id: "ellipse", label: "Circle (C)", icon: "◯", group: "SHAPES" },
+  { id: "pencil", label: "Pencil (P)", icon: "✏️", group: "DRAW" },
+  { id: "eraser", label: "Eraser (E)", icon: "🩷", group: "DRAW" },
+  { id: "fill", label: "Bucket (B)", icon: "🪣", group: "DRAW" },
+  { id: "eyedropper", label: "Color Picker (V)", icon: "💧", group: "DRAW" },
+  { id: "line", label: "Line (L)", icon: "📏", group: "SHAPES" },
+  { id: "rect", label: "Rectangle (R)", icon: "▱", group: "SHAPES" },
+  { id: "ellipse", label: "Circle (C)", icon: "⭕", group: "SHAPES" },
   { id: "select", label: "Selection (S)", icon: "▧", group: "EDIT" },
-  { id: "text", label: "Pixel text (T)", icon: "T", group: "EDIT" },
+  { id: "text", label: "Pixel text (T)", icon: "🔤", group: "EDIT" },
 ];
 
 const DEFAULT_PALETTE = ["#171923", "#ffffff", "#c4b5fd", "#a78bfa", "#7c3aed", "#3ee0ff", "#00a6a6", "#6fcf97", "#f6c177", "#f38ba8", "#e76f51", "#8b5e3c", "#5d7290", "#38465f", "#737994", "#000000"];
